@@ -67,7 +67,7 @@
             <li class="slide__category"><span class="category-name">Trade</span></li>
              <!-- End::slide__category -->
 
-            <li class="slide has-sub @if(request()->routeIs(['tradings', 'assets'])) active @endif">
+            <!-- <li class="slide has-sub @if(request()->routeIs(['tradings', 'assets'])) active @endif">
                 <a href="javascript:void(0);" class="side-menu__item">
                 <i class="fe fe-tag mx-2"></i>
                     <span class="side-menu__label">Stocks</span>
@@ -81,7 +81,7 @@
                         <a href="{{ route('assets') }}" class="side-menu__item @if(request()->routeIs(['assets'])) active @endif">Holdings</a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
 
             <li class="slide has-sub @if(request()->routeIs(['crypto', 'crypto.assets'])) active @endif">
                 <a href="javascript:void(0);" class="side-menu__item">
