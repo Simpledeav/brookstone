@@ -25,12 +25,10 @@ use App\Http\Controllers\TradingController;
 */
 
 Route::get('/', [FrontendController::class, 'index'])->name('home');
-Route::get('/investing', [FrontendController::class, 'investment'])->name('investment');
-Route::get('/cash', [FrontendController::class, 'cash'])->name('cash');
-Route::get('/stocks', [FrontendController::class, 'stocks'])->name('stocks');
-Route::get('/blog', [FrontendController::class, 'blog'])->name('blog');
-Route::get('/retirement', [FrontendController::class, 'retirement'])->name('retirement');
-Route::get('/college', [FrontendController::class, 'college'])->name('college');
+Route::get('/about', [FrontendController::class, 'about'])->name('about');
+Route::get('/advisor', [FrontendController::class, 'advisor'])->name('advisor');
+Route::get('/solution', [FrontendController::class, 'solution'])->name('solution');
+Route::get('/traning', [FrontendController::class, 'traning'])->name('traning');
 
 Auth::routes(['verify' => true]);
 

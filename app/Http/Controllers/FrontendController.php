@@ -20,33 +20,23 @@ class FrontendController extends Controller
         return view('frontend.index');
     }
 
-    public function investment()
+    public function about()
     {
-        return view('frontend.investment');
+        return view('frontend.about');
     }
 
-    public function cash()
+    public function advisor()
     {
-        return view('frontend.cash');
+        return view('frontend.advisor');
     }
 
-    public function stocks()
+    public function solution()
     {
-        return view('frontend.stocks');
+        return view('frontend.solution');
     }
 
-    public function blog()
+    public function traning()
     {
-        return view('frontend.blog');
-    }
-
-    public function retirement()
-    {
-        return view('frontend.retirement');
-    }
-
-    public function college()
-    {
-        return view('frontend.college');
+        return view('frontend.traning');
     }
 }
