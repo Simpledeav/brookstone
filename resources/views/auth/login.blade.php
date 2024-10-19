@@ -15,7 +15,7 @@
                 <div class="card-body p-5">
                     <div class="mb-3 d-flex justify-content-center"> 
                         <a href="index.html"> 
-                            <img src="../assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo"> 
+                            <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89738fb94ad8c69fab365_brookstone_logoFULL_WHITE_2021.svg" alt="logo" class="desktop-logo"> 
                             <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark"> 
                         </a> 
                     </div>
