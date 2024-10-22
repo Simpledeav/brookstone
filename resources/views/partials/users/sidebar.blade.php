@@ -3,11 +3,11 @@
 
 <!-- Start::main-sidebar-header -->
 <div class="main-sidebar-header">
-    <a href="index.html" class="header-logo">
-        <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89738fb94ad8c69fab365_brookstone_logoFULL_WHITE_2021.svg" alt="logo" class="desktop-logo">
-        <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89738fb94ad8c69fab365_brookstone_logoFULL_WHITE_2021.svg" alt="logo" class="toggle-dark">
-        <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89738fb94ad8c69fab365_brookstone_logoFULL_WHITE_2021.svg" alt="logo" class="desktop-dark">
-        <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89738fb94ad8c69fab365_brookstone_logoFULL_WHITE_2021.svg" alt="logo" class="toggle-logo">
+    <a href="/" class="header-logo">
+        <img src="{{ asset('asset/images/logo/logo-light.png') }}" alt="logo" class="desktop-logo">
+        <img src="{{ asset('asset/images/logo/logo-light.png') }}" alt="logo" class="toggle-dark">
+        <img src="{{ asset('asset/images/logo/logo-light.png') }}" alt="logo" class="desktop-dark">
+        <img src="{{ asset('asset/images/logo/logo-light.png') }}" alt="logo" class="toggle-logo">
     </a>
 </div>
 <!-- End::main-sidebar-header -->
@@ -67,7 +67,7 @@
             <li class="slide__category"><span class="category-name">Trade</span></li>
              <!-- End::slide__category -->
 
-            <!-- <li class="slide has-sub @if(request()->routeIs(['tradings', 'assets'])) active @endif">
+            <li class="slide has-sub @if(request()->routeIs(['tradings', 'assets'])) active @endif">
                 <a href="javascript:void(0);" class="side-menu__item">
                 <i class="fe fe-tag mx-2"></i>
                     <span class="side-menu__label">Stocks</span>
@@ -81,7 +81,7 @@
                         <a href="{{ route('assets') }}" class="side-menu__item @if(request()->routeIs(['assets'])) active @endif">Holdings</a>
                     </li>
                 </ul>
-            </li> -->
+            </li>
 
             <li class="slide has-sub @if(request()->routeIs(['crypto', 'crypto.assets'])) active @endif">
                 <a href="javascript:void(0);" class="side-menu__item">
@@ -122,6 +122,13 @@
                 <a href="{{ route('transactions.history') }}" class="side-menu__item">
                     <i class="fe fe-dollar-sign mx-2"></i>
                     <span class="side-menu__label">History</span>
+                </a>
+            </li>
+
+            <li class="slide @if(request()->routeIs(['support.index'])) active @endif">
+                <a href="{{ route('support.index') }}" class="side-menu__item">
+                    <i class="fe fe-user mx-2"></i>
+                    <span class="side-menu__label">Support</span>
                 </a>
             </li>
 

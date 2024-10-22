@@ -6,12 +6,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SavingsController;
+use App\Http\Controllers\SupportController;
+use App\Http\Controllers\TradingController;
+use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Auth\EmailverificationController;
-use App\Http\Controllers\FrontendController;
-use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\TradeController as ControllersTradeController;
-use App\Http\Controllers\TradingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -130,5 +131,11 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
         Route::post('/asset/{trade}/close/all', [TradingController::class, 'closeAllAssets'])->name('asset.close.all');
 
 
+        Route::get('/support/ticket', [SupportController::class, 'index'])->name('support.index');
+        Route::get('/support/ticket/{support}', [SupportController::class, 'show'])->name('support.show');
+        Route::get('/support/create', [SupportController::class, 'create'])->name('support.create');
+        Route::post('/support/ticket/store', [SupportController::class, 'store'])->name('support.store');
+        Route::delete('/support/ticket/{id}', [SupportController::class, 'destroy'])->name('support.destroy');
+        Route::post('/support/ticket/{support}/respond', [SupportController::class, 'reply'])->name('support.reply');
     // });
 });
