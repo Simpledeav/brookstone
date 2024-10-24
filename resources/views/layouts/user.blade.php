@@ -143,7 +143,7 @@
                         <li class="link-menu-item"><a href="{{ route('turnkey') }}" class="footer-link">Marketing</a></li>
                         <li class="link-menu-item"><a href="{{ route('advisor') }}" class="footer-link">Advisor Resources</a></li>
                      </ul>
-                     <a href="investment-solutions.html" class="footer-link">Investments</a>
+                     <a href="{{ route('investment') }}" class="footer-link">Investments</a>
                   </div>
                   <div class="footer-menu-column">
                      <h6 class="h6-small">Company</h6>
