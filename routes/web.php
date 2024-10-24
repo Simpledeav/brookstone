@@ -31,6 +31,23 @@ Route::get('/advisor', [FrontendController::class, 'advisor'])->name('advisor');
 Route::get('/solution', [FrontendController::class, 'solution'])->name('solution');
 Route::get('/traning', [FrontendController::class, 'traning'])->name('traning');
 
+Route::get('/platform', [FrontendController::class, 'platform'])->name('platform');
+Route::get('/investment', [FrontendController::class, 'investment'])->name('investment');
+Route::get('/turnkey', [FrontendController::class, 'turnkey'])->name('turnkey');
+Route::get('/service', [FrontendController::class, 'service'])->name('service');
+Route::get('/financial', [FrontendController::class, 'financial'])->name('financial');
+
+Route::get('/advisor', [FrontendController::class, 'advisor'])->name('advisor');
+Route::get('/market', [FrontendController::class, 'market'])->name('market');
+Route::get('/news', [FrontendController::class, 'news'])->name('news');
+
+Route::get('/testimonial', [FrontendController::class, 'testimonial'])->name('testimonial');
+Route::get('/press', [FrontendController::class, 'press'])->name('press');
+Route::get('/demo', [FrontendController::class, 'demo'])->name('demo');
+
+
+
+
 Auth::routes(['verify' => true]);
 
 Route::get('/auth/{provider}/attempt', [App\Http\Controllers\Auth\SocialController::class, 'redirect'])->name('auth.social.attempt');
@@ -71,7 +88,7 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
         Route::get('/trades', [App\Http\Controllers\TradeController::class, 'index'])->name('trades');
         Route::get('/buy', [App\Http\Controllers\TradeController::class, 'showBuyForm'])->name('buy');
         Route::get('/sell', [App\Http\Controllers\TradeController::class, 'showSellForm'])->name('sell');
-        Route::get('/market/chart', [App\Http\Controllers\HomeController::class, 'market'])->name('market');
+        // Route::get('/market/chart', [App\Http\Controllers\HomeController::class, 'market'])->name('market');
         Route::get('/wallet', [App\Http\Controllers\WalletController::class, 'index'])->name('wallet');
         Route::get('/referrals', [App\Http\Controllers\ReferralController::class, 'index'])->name('referrals');
         Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications');
