@@ -15,7 +15,7 @@
                 <div class="card-body p-5">
                     <div class="mb-3 d-flex justify-content-center"> 
                         <a href="index.html"> 
-                            <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89738fb94ad8c69fab365_brookstone_logoFULL_WHITE_2021.svg" alt="logo" class="desktop-logo"> 
+                            <img width="150" src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="desktop-logo"> 
                             <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark"> 
                         </a> 
                     </div>
@@ -40,7 +40,7 @@
                                 @enderror
                             </div>
                             <div class="col-xl-12 mb-2">
-                                <label for="signin-password" class="form-label text-default d-block">Password<a href="reset-password-basic.html" class="float-end link-primary op-5 fw-medium fs-12">Forget password ?</a></label>
+                                <label for="signin-password" class="form-label text-default d-block">Password<a href="{{ route('password.request') }}" class="float-end link-primary op-5 fw-medium fs-12">Forget password ?</a></label>
                                 <div class="input-group">
                                     <input name="password" type="password" class="form-control" id="signin-password" placeholder="Enter password...">
                                     <a href="javascript:void(0);" class="input-group-text bg-white text-muted" onclick="createpassword('signin-password',this)"><i class="ri-eye-off-line align-middle"></i></a>

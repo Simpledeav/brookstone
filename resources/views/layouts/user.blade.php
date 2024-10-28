@@ -1,6 +1,6 @@
-<!DOCTYPE html><!-- Last Published: Fri Sep 06 2024 14:10:55 GMT+0000 (Coordinated Universal Time) -->
+<!DOCTYPE html>
 <html data-wf-domain="www.brookstonecm.com" data-wf-page="623208af18993055866f074f" data-wf-site="60f88e4b0ddb8e1d95163233">
-   <!-- Mirrored from www.brookstonecm.com/ by HTTrack Website Copier/3.x [XR&CO'2014], Wed, 16 Oct 2024 11:29:07 GMT -->
+   
    <head>
       <meta charset="utf-8"/>
       <title>Financial Advisor Asset Management Platform | Brookstone</title>
@@ -15,7 +15,9 @@
       <link href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/css/brookstonecm.0e30362f4.min.css" rel="stylesheet" type="text/css"/>
       <link href="https://fonts.googleapis.com/" rel="preconnect"/>
       <link href="https://fonts.gstatic.com/" rel="preconnect" crossorigin="anonymous"/>
-      <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script><script type="text/javascript">WebFont.load({  google: {    families: ["Rubik:regular,italic,500,500italic,700,700italic","Inter:100,200,regular,700"]  }});</script><script type="text/javascript">!function(o,c){var n=c.documentElement,t=" w-mod-";n.className+=t+"js",("ontouchstart"in o||o.DocumentTouch&&c instanceof DocumentTouch)&&(n.className+=t+"touch")}(window,document);</script>
+      <script src="https://ajax.googleapis.com/ajax/libs/webfont/1.6.26/webfont.js" type="text/javascript"></script>
+      <script type="text/javascript">WebFont.load({  google: {    families: ["Rubik:regular,italic,500,500italic,700,700italic","Inter:100,200,regular,700"]  }});</script>
+      <script type="text/javascript">!function(o,c){var n=c.documentElement,t=" w-mod-";n.className+=t+"js",("ontouchstart"in o||o.DocumentTouch&&c instanceof DocumentTouch)&&(n.className+=t+"touch")}(window,document);</script>
       <link href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/612d65266a5e360eef0892ea_brookstone_favicon.png" rel="shortcut icon" type="image/x-icon"/>
       <link href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/612d6562846737a3790aceec_brookstone_webclip.png" rel="apple-touch-icon"/>
 
@@ -99,14 +101,14 @@
                             <a href="{{ route('demo') }}" class="dropdown-link">Contact us</a>
                         </nav>
                      </div>
-                     <a href="individual-investors.html" class="button-nav-main-copy navbar-button-copy w-inline-block">
+                     <a href="{{ route('login') }}" class="button-nav-main-copy navbar-button-copy w-inline-block">
                         <div class="nav-button-text-white">Are you a client?</div>
                         <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/62c4ad6f9efc0fec178d7d07_white-arrow-right.svg" loading="eager" alt="White arrow pointing right" class="nav-button-arrow-white"/>
                      </a>
                   </div>
                </nav>
                <div class="nav-buttons-container-copy">
-                  <a href="individual-investors.html" class="button-nav-main navbar-button-copy w-inline-block">
+                  <a href="{{ route('login') }}" class="button-nav-main navbar-button-copy w-inline-block">
                      <div class="nav-button-text-white">Are you a client?</div>
                      <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/62c4ad6f9efc0fec178d7d07_white-arrow-right.svg" loading="eager" alt="Are you a client button" class="nav-button-arrow-white"/>
                   </a>
@@ -119,8 +121,6 @@
 
 
       @yield('content')
-
-
 
 
 
@@ -154,7 +154,7 @@
                         <li class="link-menu-item"><a href="{{ route('testimonial') }}" class="footer-link">Testimonials</a></li>
                      </ul>
                   </div>
-                  <div class="footer-menu-column">
+                  <!-- <div class="footer-menu-column">
                      <h6 class="h6-small">Account Access</h6>
                      <ul role="list" class="link-menu w-list-unstyled">
                         <li class="link-menu-item"><a href="https://portal.brookstonecm.com/Account/Login?ReturnUrl=%2F" class="footer-link">Advisor Portal</a></li>
@@ -163,16 +163,16 @@
                         <li class="link-menu-item"><a href="https://www.legacy.brookstonecm.com/user/login" class="footer-link">Advisor login</a></li>
                      </ul>
                      <a href="individual-investors.html" class="footer-link">Individual clients</a>
-                  </div>
+                  </div> -->
                   <div class="footer-menu-column">
                      <h6 class="h6-small">Legal</h6>
                      <ul role="list" class="link-menu w-list-unstyled">
-                        <li class="link-menu-item"><a href="legal/privacy-policy.html" class="footer-link">Privacy</a></li>
-                        <li class="link-menu-item"><a href="legal/terms-conditions.html" class="footer-link">Terms</a></li>
-                        <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/6545132ac3028f7a806cf4f0_BCM Form ADV Part 2A 11.1.23.pdf" target="_blank" class="footer-link">Form ADV</a></li>
+                        <li class="link-menu-item"><a href="{{ route('privacy') }}" class="footer-link">Privacy</a></li>
+                        <li class="link-menu-item"><a href="{{ route('terms') }}" class="footer-link">Terms</a></li>
+                        <!-- <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/6545132ac3028f7a806cf4f0_BCM Form ADV Part 2A 11.1.23.pdf" target="_blank" class="footer-link">Form ADV</a></li>
                         <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/65451363208ce5144805f7b3_BCM Form ADV Part 2A WRAP 11.1.23.pdf" target="_blank" class="footer-link">Wrap brochure</a></li>
                         <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/6545149865076c293451ca37_Form CRS Combined 6.21.23.pdf" class="footer-link">Form CRS</a></li>
-                        <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/63516eed4a779e83431b442b_Business Continuity Plan Summary.pdf" target="_blank" class="footer-link">Business Continuity <br/>Plan Summary</a></li>
+                        <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/63516eed4a779e83431b442b_Business Continuity Plan Summary.pdf" target="_blank" class="footer-link">Business Continuity <br/>Plan Summary</a></li> -->
                      </ul>
                   </div>
                </div>
@@ -189,112 +189,3 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{{-- <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    @include('partials.header')
-    @yield('styles')
-    <title>{{ env('APP_NAME') }}  @isset($title) | @endisset {{ $title ?? '' }} </title>
-    
-</head>
-<body>
-<div class="main-wrapper">
-
-    @include('partials.user.sidebar')
-
-    <div class="page-wrapper">
-
-        @include('partials.user.topbar')
-
-        <div class="page-content">
-
-            @yield('breadcrumbs')
-
-            @if (session('error'))
-                <div class="alert alert-fill-danger" role="alert">
-                    <i data-feather="alert-circle" class="mr-2"></i>
-                    <strong style="font-size: 13px" class="small">{{ session('error') }}</strong>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @elseif(session('success'))
-                <div class="alert alert-fill-success" role="alert">
-                    <i data-feather="check-circle" class="mr-2"></i>
-                    <strong style="font-size: 13px" class="small">{{ session('success') }}</strong>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @elseif(session('info'))
-                <div class="alert alert-fill-warning" role="alert">
-                    <i data-feather="check-circle" class="mr-2"></i>
-                    <strong style="font-size: 13px" class="small">{{ session('info') }}</strong>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            @endif
-
-            @yield('content')
-
-            @include('partials.user.modal.naira')
-
-        </div>
-
-        @include('partials.footer')
-    </div>
-</div>
-    <script src="{{ asset('asset/js/toasts.js') }}"></script>
-    @include('partials.scripts')
-    @yield('scripts')
-    <script>
-        $(document).ready(function (){
-            let payment = $('#paymentDeposit');
-            let bankDetails = $('#bankDetailsForDepositForm');
-            let securedLogo = $('#securedByPaystackLogo');
-            payment.on('change', function (){
-                if (payment.val() === 'deposit'){
-                    bankDetails.show(500);
-                    securedLogo.hide(500);
-                }else {
-                    bankDetails.hide(500);
-                    securedLogo.show(500);
-                }
-            });
-        });
-    </script>
-</body>
-</html> --}}

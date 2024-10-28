@@ -12,7 +12,8 @@
     <meta name="Author" content="Spruko Technologies Private Limited">
 <meta name="keywords" content="dashboard template,dashboard html,bootstrap admin,dashboard admin,admin template,sales dashboard,crypto dashboard,projects dashboard,html template,html,html css,admin dashboard template,html css bootstrap,dashboard html css,pos system,bootstrap dashboard">
     <!-- Favicon -->
-    <link rel="icon" href="{{ asset('asset/images/brand-logos/favicon.ico') }}" type="image/x-icon">
+    <link href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/612d65266a5e360eef0892ea_brookstone_favicon.png" rel="shortcut icon" type="image/x-icon"/>
+    <link href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/612d6562846737a3790aceec_brookstone_webclip.png" rel="apple-touch-icon"/>
 
     <!-- Main Theme Js -->
     <script src="{{ asset('asset/js/authentication-main.js') }}"></script>

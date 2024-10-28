@@ -1,34 +1,56 @@
-@extends('layouts.auth')
+@extends('layouts.user.auth')
+
+@section('title', '| Reset password')
 
 @section('content')
-    <div class="col-md-8 pl-md-0">
-        <div class="auth-form-wrapper px-4 py-5">
-            @if (session('status'))
-                <div class="alert alert-fill-success" role="alert">
-                    <i data-feather="check-circle" class="mr-2"></i>
-                    <strong class="small">{{ session('status') }}</strong>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+
+<div class="container">
+    <div class="row justify-content-center authentication authentication-basic align-items-center h-100">
+        <div class="col-xxl-4 col-xl-5 col-lg-5 col-md-6 col-sm-8 col-12">
+            <div class="rounded my-4 bg-white basic-page">
+                <div class="basicpage-border"></div>
+                <div class="basicpage-border1"></div>
+                <div class="card-body p-5">
+                    <div class="mb-3 d-flex justify-content-center"> 
+                        <a href="index.html"> 
+                            <img width="150" src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="desktop-logo"> 
+                            <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark"> 
+                        </a> 
+                    </div>
+                    <p class="h4 fw-semibold mb-2 text-center fs-16 mb-6">Forgot Password</p>
+                    <!-- <p class="mb-4 text-muted fw-normal text-center">Welcome back !</p> -->
+                    @if (session('status'))
+                        <div class="alert alert-fill-danger">
+                            <i data-feather="alert-circle" class="mr-2"></i>
+                            <strong class="small">{{ session('status') }}</strong>
+                        </div>
+                    @endif
+                    <form action="{{ route('password.email') }}" method="post">
+                        @csrf
+                        <div class="row gy-3">
+                            <div class="col-xl-12">
+                                <label for="signin-username" class="form-label text-default">Email address</label>
+                                <input name="email" type="text" class="form-control" id="signin-username" placeholder="Enter email...">
+                                @error('email')
+                                    <span class="text-danger">
+                                        <i class="fe fe-info fs-5 mx-1"></i><strong class="fs-10">{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">Reset Password</button>
+                        </div>
+                    </form>
+                    <div class="text-center">
+                        <p class="text-muted mt-3 mb-0">Back to Sign in ? <a href="{{ route('login') }}" class="text-primary">Sign Up</a></p>
+                    </div>
                 </div>
-            @endif
-            <h5 class="text-muted font-weight-normal mb-4">Send Password Reset Link</h5>
-            <form class="forms-sample" method="POST" action="{{ route('password.email') }}">
-                @csrf
-                <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
-                    @error('email')
-                    <span class="invalid-feedback" role="alert">
-                            <strong>{{ $message }}</strong>
-                        </span>
-                    @enderror
-                </div>
-                <div class="my-3">
-                    <button type="submit" class="btn btn-primary mr-2 mb-2 mb-md-0 text-white">Send Password Reset Link</button>
-                </div>
-                <a href="{{ route('login') }}" class="d-block mt-2 text-muted">Back to Sign in</a>
-            </form>
+            </div>
         </div>
     </div>
+</div>
+
+
+
 @endsection

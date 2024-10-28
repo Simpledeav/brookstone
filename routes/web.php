@@ -45,6 +45,9 @@ Route::get('/testimonial', [FrontendController::class, 'testimonial'])->name('te
 Route::get('/press', [FrontendController::class, 'press'])->name('press');
 Route::get('/demo', [FrontendController::class, 'demo'])->name('demo');
 
+Route::get('/privacy', [FrontendController::class, 'privacy'])->name('privacy');
+Route::get('/terms', [FrontendController::class, 'terms'])->name('terms');
+
 
 
 

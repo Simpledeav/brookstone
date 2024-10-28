@@ -1,4 +1,6 @@
-@extends('layouts.auth')
+@extends('layouts.user.auth')
+
+@section('title', '| Reset password')
 
 @section('content')
     <div class="col-md-8 pl-md-0">
