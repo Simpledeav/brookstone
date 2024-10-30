@@ -154,25 +154,25 @@
                         <li class="link-menu-item"><a href="{{ route('testimonial') }}" class="footer-link">Testimonials</a></li>
                      </ul>
                   </div>
-                  <!-- <div class="footer-menu-column">
+                  <div class="footer-menu-column">
                      <h6 class="h6-small">Account Access</h6>
                      <ul role="list" class="link-menu w-list-unstyled">
-                        <li class="link-menu-item"><a href="https://portal.brookstonecm.com/Account/Login?ReturnUrl=%2F" class="footer-link">Advisor Portal</a></li>
-                        <li class="link-menu-item"><a href="https://login.orionadvisor.com/login.html?g=1872662E-89DD-46B2-8410-0D374D812730" target="_blank" class="footer-link">Orion</a></li>
-                        <li class="link-menu-item"><a href="https://advisorservices.schwab.com/advisor/login" class="footer-link">Schwab</a></li>
-                        <li class="link-menu-item"><a href="https://www.legacy.brookstonecm.com/user/login" class="footer-link">Advisor login</a></li>
+                        <li class="link-menu-item"><a href="{{ route('login') }}" class="footer-link">Advisor Portal</a></li>
+                        <li class="link-menu-item"><a href="{{ route('crypto') }}" target="_blank" class="footer-link">Crypto</a></li>
+                        <li class="link-menu-item"><a href="{{ route('crypto') }}" class="footer-link">Stocks</a></li>
+                        <li class="link-menu-item"><a href="{{ route('register') }}" class="footer-link">Advisor login</a></li>
                      </ul>
-                     <a href="individual-investors.html" class="footer-link">Individual clients</a>
-                  </div> -->
+                     <a href="{{ route('dashboard') }}" class="footer-link">Individual clients</a>
+                  </div>
                   <div class="footer-menu-column">
                      <h6 class="h6-small">Legal</h6>
                      <ul role="list" class="link-menu w-list-unstyled">
                         <li class="link-menu-item"><a href="{{ route('privacy') }}" class="footer-link">Privacy</a></li>
                         <li class="link-menu-item"><a href="{{ route('terms') }}" class="footer-link">Terms</a></li>
-                        <!-- <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/6545132ac3028f7a806cf4f0_BCM Form ADV Part 2A 11.1.23.pdf" target="_blank" class="footer-link">Form ADV</a></li>
-                        <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/65451363208ce5144805f7b3_BCM Form ADV Part 2A WRAP 11.1.23.pdf" target="_blank" class="footer-link">Wrap brochure</a></li>
-                        <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/6545149865076c293451ca37_Form CRS Combined 6.21.23.pdf" class="footer-link">Form CRS</a></li>
-                        <li class="link-menu-item"><a href="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/63516eed4a779e83431b442b_Business Continuity Plan Summary.pdf" target="_blank" class="footer-link">Business Continuity <br/>Plan Summary</a></li> -->
+                        <li class="link-menu-item"><a href="{{ asset('PDF/ADV-BS.pdf') }}" target="_blank" class="footer-link">Form ADV</a></li>
+                        <li class="link-menu-item"><a href="{{ asset('PDF/Wrap-BS.pdf') }}" target="_blank" class="footer-link">Wrap brochure</a></li>
+                        <li class="link-menu-item"><a href="{{ asset('PDF/Form-BS.pdf') }}" class="footer-link">Form CRS</a></li>
+                        <li class="link-menu-item"><a href="{{ asset('PDF/Business-BS.pdf') }}" target="_blank" class="footer-link">Business Continuity <br/>Plan Summary</a></li>
                      </ul>
                   </div>
                </div>
