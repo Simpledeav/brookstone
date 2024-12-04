@@ -6,12 +6,14 @@ use Carbon\Carbon;
 use App\Models\Stock;
 use App\Models\Trade;
 use App\Models\Crypto;
+use App\Models\Ledger;
 use App\Models\Saving;
 use App\Models\Setting;
 use App\Models\Trading;
 use App\Models\CryptoTrade;
 use Illuminate\Http\Request;
 use App\Models\SavingPackage;
+use InvalidArgumentException;
 use App\Models\AssetTransaction;
 use App\Models\TradeTransaction;
 use App\Models\CryptoTransaction;
@@ -97,12 +99,19 @@ class TradingController extends Controller
         if ($request['type'] == 'buy') {
 
             // Check for sufficient balance
-            if (!$user->inSufficientBalance($amount, 'trading')) {
+            if (!$user->wallet->sufficentAccountBalance($amount, 'trade')) {
                 return back()->withInput()->with('error', 'Insufficient trading balance');
             } else {
                 // Handle buy trade
                 $trade = $this->handleBuyTrade($request, $amount);
-                $user->updateWalletBalance('trading', $amount, 'decrement'); 
+
+                // ::::: Store Ledger :::::: //
+                try {
+                    Ledger::debit($user->wallet, $amount, 'trade', null, 'Trade stocks...');
+                } catch (InvalidArgumentException $e) {
+                    return back()->with('error', 'Error debiting wallet: ' . $e->getMessage());
+                }
+                // ::::: Store Ledger :::::: //
             }
                 
         } elseif ($request['type'] == 'sell') {
@@ -110,6 +119,12 @@ class TradingController extends Controller
             $trade = $this->handleSellTrade($request, $stockAmount);
             if (!$trade) {
                 return back()->with('error', 'Error processing sell trade');
+            }
+
+            try {
+                Ledger::credit($user->wallet, $stockAmount, 'trade', null, 'Trade stocks sell...');
+            } catch (InvalidArgumentException $e) {
+                return back()->with('error', 'Error debiting wallet: ' . $e->getMessage());
             }
         }
 
@@ -147,6 +162,7 @@ class TradingController extends Controller
         
         if ($existingTrade) {
             $existingTrade->increment('quantity', $request['quantity']);
+            $existingTrade->increment('amount', $request['quantity'] * $request['amount']);
         } else {
             $existingTrade = $user->trades('stocks')->create([
                 'data_id' => $request['stock_id'],
@@ -169,6 +185,7 @@ class TradingController extends Controller
         return $existingTrade;
     }
 
+    //::::: closeTrade has replaced it ::::://
     private function handleSellTrade($request, $stockAmount)
     {
         $user = auth()->user();
@@ -183,8 +200,6 @@ class TradingController extends Controller
                 if ($existingTrade->quantity == 0) {
                     $existingTrade->delete();
                 }
-
-                $user->updateWalletBalance('trading', $stockAmount, 'increment'); 
 
                 // Calculate profit for the sell trade
                 $profit = ($request['quantity'] * $stock->price) - ($existingTrade->amount); //this is wrong
@@ -205,6 +220,7 @@ class TradingController extends Controller
 
         return null; // No existing trade to sell
     }
+    //::::: closeTrade has replaced it ::::://
 
     public function asset()
     {
@@ -214,15 +230,48 @@ class TradingController extends Controller
 
         // Calculate the total amount of all trades
         $totalStocks = $user->trades('stocks')->sum('amount');
-        $watchList = Stock::latest()->take(3)->get();
+
+        $watchlistData = $user->watchlist()->where('type', 'crypto')->pluck('data_id');
+        $watchlist = Stock::whereIn('id', $watchlistData)->get();
+
+        $totalInvestment = 0;
+        $totalCurrentValue = 0;
+        $totalQuantity = 0;
+
+        $stocks = $user->trades('stocks')->with('stock')->get();
+
+        foreach ($stocks as $stock) {
+            $investmentAmount = $stock->purchase_amount * $stock->quantity;
+            $currentValue = $stock->stock['price'] * $stock->quantity;
+
+            $currentQuantity = $stock->quantity;
+
+            $totalInvestment += $investmentAmount;
+            $totalCurrentValue += $currentValue;
+            $totalQuantity += $currentQuantity;
+        }
+
+        $totalProfit = $totalCurrentValue - $totalInvestment;
+        $percentageDifference = ($totalInvestment > 0) 
+            ? ($totalProfit / $totalInvestment) * 100 
+            : 0;
+        
+        $equityBalance = $totalCurrentValue;
+        $totalAssetQuantity = $totalQuantity;
 
         return view('user_.trade.asset', [
             'title' => 'Trading',
-            'asset' => $assets->count(),
+            'assetNumber' => $user->trades('stocks')->count(),
             'assets' => $assets,
             'balance' => $balance,
             'totalAmount' => $totalStocks,
-            'watchList' => $watchList,
+            'watchList' => $watchlist,
+
+            'equityBalance' => $equityBalance,
+            'totalProfit' => $totalProfit,
+            'totalInvestment' => $totalCurrentValue,
+            'percentageDifference' => $percentageDifference,
+            'totalAssetQuantity' => $totalAssetQuantity
         ]);
     }
     
@@ -306,7 +355,7 @@ class TradingController extends Controller
         $profit = $ownAsset ? $ownAsset->amount : 0;
 
         // Calculate overall profit/loss
-        $overallProfitLoss = ($transaction->where('type', 'buy')->sum('amount') - ($transaction->where('type', 'buy')->sum('quantity') * $stock->price));
+        $overallProfitLoss = (($transaction->where('type', 'buy')->sum('quantity') * $stock->price) - $transaction->where('type', 'buy')->sum('amount'));
         $percentageOverallProfitLoss = $amount > 0 ? ($overallProfitLoss / $amount) * 100 : 0;
 
         return view('user_.trade.show-asset', [
@@ -330,8 +379,11 @@ class TradingController extends Controller
 
         $profitAmount = $stock->price * $trade->quantity;
 
-        $user->updateWalletBalance('trading', $profitAmount, 'increment');
-
+        try {
+            Ledger::credit($user->wallet, $profitAmount, 'trade', null, 'Trade stocks sell...');
+        } catch (InvalidArgumentException $e) {
+            return back()->with('error', 'Error crediting wallet: ' . $e->getMessage());
+        }
 
         $trade->delete();
 
@@ -356,7 +408,13 @@ class TradingController extends Controller
                 $trade->delete();
             }
 
-            $user->updateWalletBalance('trading', $profitAmount, 'increment');
+            // $user->updateWalletBalance('trading', $profitAmount, 'increment');
+
+            try {
+                Ledger::credit($user->wallet, $profitAmount, 'trade', null, 'Trade stocks sell...');
+            } catch (InvalidArgumentException $e) {
+                return back()->with('error', 'Error crediting wallet: ' . $e->getMessage());
+            }
 
             $tradeTransaction->update([
                 'type' => 'sell',
@@ -455,7 +513,14 @@ class TradingController extends Controller
             } else {
                 // Handle buy trade
                 $trade = $this->handleBuyCrypto($request, $amount);
-                $user->updateWalletBalance('trading', $amount, 'decrement'); 
+
+                // ::::: Store Ledger :::::: //
+                try {
+                    Ledger::debit($user->wallet, $amount, 'trade', null, 'Trade stocks...');
+                } catch (InvalidArgumentException $e) {
+                    return back()->with('error', 'Error debiting wallet: ' . $e->getMessage());
+                }
+                // ::::: Store Ledger :::::: //
             }
         } elseif ($request['type'] == 'sell') {
             // Handle sell trade
@@ -499,6 +564,7 @@ class TradingController extends Controller
         
         if ($existingTrade) {
             $existingTrade->increment('quantity', $request['lots']);
+            $existingTrade->increment('amount', $request['lots'] * $request['amount']);
         } else {
             $existingTrade = $user->trades('crypto')->create([
                 'data_id' => $request['crypto_id'],
@@ -563,7 +629,7 @@ class TradingController extends Controller
 
                 $transaction = TradeTransaction::find($request['trans_id']);
 
-                if($transaction->quantity == 0.00001) {
+                if($transaction->quantity <= 0.000001 && $existingTrade->amount < 1) {
                     $transaction->delete();
                 } else {
                     if($transaction->quantity >= 0 & ($request['lots'] * $crypto->price) >= 0)
@@ -571,11 +637,17 @@ class TradingController extends Controller
                         $transaction->decrement('amount', ($request['lots'] * $crypto->price));
                 }
 
-                if($existingTrade->quantity == 0.1) {
+                if($existingTrade->quantity <= 0 && $existingTrade->amount < 1) {
                     $transaction->delete();
                 }
 
-                $user->updateWalletBalance('trading', $cryptoAmount, 'increment'); 
+                // $user->updateWalletBalance('trading', $cryptoAmount, 'increment'); 
+
+                try {
+                    Ledger::credit($user->wallet, $cryptoAmount, 'trade', null, 'Trade stocks sell...');
+                } catch (InvalidArgumentException $e) {
+                    return back()->with('error', 'Error crediting wallet: ' . $e->getMessage());
+                }
 
                 // Calculate profit for the sell trade
                 // $profit = ($request['lots'] * $crypto->price) - ($existingTrade->entry_price * $request['lots']);
@@ -617,15 +689,47 @@ class TradingController extends Controller
         // Calculate the total amount of all trades
         $totalStocks = $user->trades('crypto')->sum('amount');
 
-        $watchList = Crypto::latest()->take(3)->get();
+        $watchlistData = $user->watchlist()->where('type', 'crypto')->pluck('data_id');
+        $watchlist = Crypto::whereIn('id', $watchlistData)->get();
+
+        $totalInvestment = 0;
+        $totalCurrentValue = 0;
+        $totalQuantity = 0;
+
+        $stocks = $user->trades('crypto')->with('crypto')->get();
+
+        foreach ($stocks as $stock) {
+            $investmentAmount = $stock->purchase_amount * $stock->quantity;
+            $currentValue = $stock->crypto['price'] * $stock->quantity;
+
+            $currentQuantity = $stock->quantity;
+
+            $totalInvestment += $investmentAmount;
+            $totalCurrentValue += $currentValue;
+            $totalQuantity += $currentQuantity;
+        }
+
+        $totalProfit = $totalCurrentValue - $totalInvestment;
+        $percentageDifference = ($totalInvestment > 0) 
+            ? ($totalProfit / $totalInvestment) * 100 
+            : 0;
+        
+        $equityBalance = $totalCurrentValue;
+        $totalAssetQuantity = $totalQuantity;
 
         return view('user_.crypto.asset', [
             'title' => 'Trading',
-            'asset' => $assets->count(),
+            'assetNumber' => $user->trades('crypto')->count(),
             'assets' => $assets,
             'balance' => $balance,
             'totalAmount' => $totalStocks,
-            'watchList' => $watchList,
+            'watchList' => $watchlist,
+
+            'equityBalance' => $equityBalance,
+            'totalProfit' => $totalProfit,
+            'totalInvestment' => $totalCurrentValue,
+            'percentageDifference' => $percentageDifference,
+            'totalAssetQuantity' => $totalAssetQuantity
         ]);
     }
 
@@ -658,7 +762,7 @@ class TradingController extends Controller
         $profit = $ownAsset ? $ownAsset->amount : 0;
 
         // Calculate overall profit/loss
-        $overallProfitLoss = ($transaction->where('type', 'buy')->sum('amount') - ($transaction->where('type', 'buy')->sum('quantity') * $stock->price));
+        $overallProfitLoss = ($transaction->where('type', 'buy')->sum('quantity') * $stock->price) - ($transaction->where('type', 'buy')->sum('amount'));
         $percentageOverallProfitLoss = $amount > 0 ? ($overallProfitLoss / $amount) * 100 : 0;
 
         return view('user_.crypto.view', [
@@ -682,7 +786,13 @@ class TradingController extends Controller
 
         $profitAmount = $stock->price * $trade->quantity;
 
-        $user->updateWalletBalance('trading', $profitAmount, 'increment');
+        // $user->updateWalletBalance('trading', $profitAmount, 'increment');
+
+        try {
+            Ledger::credit($user->wallet, $profitAmount, 'trade', null, 'Trade stocks sell...');
+        } catch (InvalidArgumentException $e) {
+            return back()->with('error', 'Error crediting wallet: ' . $e->getMessage());
+        }
 
         $trade->delete();
 

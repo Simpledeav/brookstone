@@ -4,15 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SavingPackage extends Model
+class Watchlist extends Model
 {
     use HasFactory;
 
     protected $guarded = [];
 
-    public function savings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function watchlist(): BelongsTo
     {
-        return $this->hasMany(Saving::class, 'savings_package_id');
+        return $this->belongsTo(User::class);
     }
 }

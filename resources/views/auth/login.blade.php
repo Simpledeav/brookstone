@@ -15,7 +15,7 @@
                 <div class="card-body p-5">
                     <div class="mb-3 d-flex justify-content-center"> 
                         <a href="index.html"> 
-                            <img width="150" src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="desktop-logo"> 
+                            <img src="{{ asset('asset/images/logo/logo-dark.png') }}" alt="logo" class="desktop-logo"> 
                             <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark"> 
                         </a> 
                     </div>
@@ -40,7 +40,7 @@
                                 @enderror
                             </div>
                             <div class="col-xl-12 mb-2">
-                                <label for="signin-password" class="form-label text-default d-block">Password<a href="{{ route('password.request') }}" class="float-end link-primary op-5 fw-medium fs-12">Forget password ?</a></label>
+                                <label for="signin-password" class="form-label text-default d-block">Password  <!-- <a href="{{ route('password.request') }}" class="float-end link-primary op-5 fw-medium fs-12">Forget password ?</a></label> -->
                                 <div class="input-group">
                                     <input name="password" type="password" class="form-control" id="signin-password" placeholder="Enter password...">
                                     <a href="javascript:void(0);" class="input-group-text bg-white text-muted" onclick="createpassword('signin-password',this)"><i class="ri-eye-off-line align-middle"></i></a>
@@ -60,20 +60,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="text-center my-3 authentication-barrier">
+                        <!-- <div class="text-center my-3 authentication-barrier">
                             <span class="op-4 fs-11">Or SignIn With</span>
                         </div>
                         <div class="d-flex align-items-center justify-content-center gap-3 mb-3 flex-wrap">
                             <button class="btn btn-primary-light btn-md btn-icon">
                                 <i class="ti ti-brand-google fs-18"></i>
-                        </button>
-                        <button class="btn btn-primary-light btn-md btn-icon">
-                                <i class="ti ti-mail  fs-18"></i>
-                        </button>
-                        <button class="btn btn-primary-light btn-md btn-icon">
-                                <i class="ti ti-brand-facebook  fs-18"></i>
-                        </button>
-                        </div>
+                            </button>
+                        </div> -->
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary">Sign In</button>
                         </div>

@@ -4,20 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Models\Trading;
-use App\Notifications\EmailOTPNotification;
+use App\Models\Watchlist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Validator;
-
-
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
+
+
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Validator;
+use App\Notifications\EmailOTPNotification;
 
 class HomeController extends Controller
 {
@@ -30,7 +31,7 @@ class HomeController extends Controller
         $trading = $user->wallet->trade;
         $locked = $user->wallet->locked;
 
-        $transactions = $user->transaction()->latest()->get(); 
+        $transactions = $user->transaction()->paginate(10); 
 
         $totalAmount = 0;
 
@@ -62,6 +63,21 @@ class HomeController extends Controller
         $investmentPercentage = $totalAmount > 0 ? ($investmentTotal / $totalAmount) * 100 : 0;
         $tradingPercentage = $totalAmount > 0 ? ($tradingTotal / $totalAmount) * 100 : 0;
 
+        $inv = $user->investments()->where('status', 'active')->sum('amount');
+
+        $sav = $user->savings()
+            ->with(['savingsTransactions' => function($query) {
+                $query->where('type', 'debit')->where('status', 'success');
+            }])
+            ->get()
+            ->pluck('savingsTransactions')
+            ->flatten()
+            ->sum('amount') ?? 0;
+
+        $trd = $user->trades('stocks')->sum('amount') + $user->trades('crypto')->sum('amount');
+
+        $lockedFunds = ($inv + $sav + $trd);
+
         return view('user_.dashboard.index', [
             'title' => 'Dashboard', 
             'savings' => $savings,
@@ -79,6 +95,8 @@ class HomeController extends Controller
             'savingsPercentage' => $savingsPercentage,
             'investmentPercentage' => $investmentPercentage,
             'tradingPercentage' => $tradingPercentage,
+
+            'lockedFunds' => $lockedFunds,
         ]);
     }
 
@@ -87,7 +105,15 @@ class HomeController extends Controller
         $user = auth()->user();
 
         return view('auth.kyc', [
-            'title' => 'Complete KYC',
+            'user' => $user
+        ]);
+    }
+
+    public function user_kyc()
+    {
+        $user = auth()->user();
+
+        return view('user_.kyc.index', [
             'user' => $user
         ]);
     }
@@ -219,7 +245,7 @@ class HomeController extends Controller
 
     public function changePassword(Request $request): \Illuminate\Http\RedirectResponse
     {
-//        Validate request
+        //        Validate request
         $validator = Validator::make($request->all(), [
             'old_password' => ['required'],
             'new_password' => ['required', 'min:8', 'same:confirm_password'],
@@ -227,15 +253,15 @@ class HomeController extends Controller
         if ($validator->fails()){
             return back()->withErrors($validator)->with('error', 'Invalid input data');
         }
-//        Check if user didn't auth with socials
+        //        Check if user didn't auth with socials
         if (auth()->user()->authenticatedWithSocials()){
             return back()->with('error', 'Action not allowed');
         }
-//      Check if old password matches
+        //      Check if old password matches
         if (!Hash::check($request['old_password'], auth()->user()['password'])){
             return back()->with('error', 'Old password incorrect');
         }
-//      Change password
+        //      Change password
         if (auth()->user()->update(['password' => Hash::make($request['new_password'])])){
             return back()->with('success', 'Password changed successfully');
         }
@@ -257,7 +283,7 @@ class HomeController extends Controller
         $tradesSellMonth = [];
         $tradesBuyYear = [];
         $tradesSellYear = [];
-//        Generate current month data
+        //        Generate current month data
         for ($day = 1; $day <= date('t'); $day++){
             $transactionsMonth[] = round(auth()->user()->transactions()
                 ->where('status', 'approved')
@@ -278,7 +304,7 @@ class HomeController extends Controller
                 ->whereDate('created_at', date('Y-m') . '-' . $day)
                 ->sum('amount'));
         }
-//        Generate current year data
+        //        Generate current year data
         for ($month = 1; $month <= 12; $month++){
             $transactionsYear[] = round(auth()->user()->transactions()
                 ->where('status', 'approved')
@@ -299,11 +325,11 @@ class HomeController extends Controller
                 ->whereMonth('created_at', $month)
                 ->sum('amount'));
         }
-//       compute paid investment data
+        //       compute paid investment data
         $paidInvestment = auth()->user()->investments()
             ->where('status', 'settled')
             ->sum('amount');
-//       compute total investment data
+        //       compute total investment data
         $totalInvestment = auth()->user()->investments()
             ->where(function ($q) { $q->where('status', 'active')->orwhere('status', 'settled'); })
             ->sum('amount');
@@ -424,4 +450,360 @@ class HomeController extends Controller
         return redirect()->route('dashboard')->with('status', 'Your information has been updated successfully!');
     }
 
+    public function tabUpdates(Request $request)
+    {
+        if ($request->screen == 'one')
+        {
+            $validator = Validator::make($request->all(), [
+                'first_name' => ['required'],
+                'last_name' => ['required'],
+                'avatar' => ['sometimes', 'mimes:jpg,png,jpeg', 'max:2048'],
+            ]);
+
+            if ($validator->fails()) {
+                // Retrieve all error messages
+                $errors = $validator->errors()->all();
+            
+                // Convert errors to a readable string
+                $errorMessage = implode(', ', $errors);
+            
+                return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
+            }
+
+            $data = $request->only(['first_name', 'last_name', 'email', 'phone']);
+
+            if ($request->avatar){
+                if ($oldAvatar = auth()->user()['avatar'])
+                    try {unlink($oldAvatar);}
+                    catch(\Exception $e){}
+                $destinationPath = 'assets/photos'; // upload path
+                static::createDirectoryIfNotExists($destinationPath);
+                $transferImage = \auth()->user()['id'].'-'. time() . '.' . $request['avatar']->getClientOriginalExtension();
+                $image = Image::make($request->file('avatar'));
+                $image->save($destinationPath . '/' . $transferImage, 40);
+                $data['avatar'] = $destinationPath ."/".$transferImage;
+            }
+
+            //        Update profile
+            if (auth()->user()->update($data)){
+                return back()->with('success', 'Profile updated successfully');
+            }
+            return back()->withInput()->with('error', 'Error updating profile');
+
+        }
+
+        if ($request->screen == 'three')
+        {
+            $validator = Validator::make($request->all(), [
+                'account_name' => ['sometimes'],
+                'account_number' => ['sometimes'],
+                'bank_name' => ['sometimes'],
+                'swiss_code' => ['sometimes'],
+                'reference' => ['sometimes'],
+                'others' => ['sometimes'],
+            ]);
+
+            if ($validator->fails()) {
+                // Retrieve all error messages
+                $errors = $validator->errors()->all();
+            
+                // Convert errors to a readable string
+                $errorMessage = implode(', ', $errors);
+            
+                return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
+            }
+
+            $user =auth()->user();
+
+            $update = $user->update([
+                'account_name' => $request->account_name,
+                'account_number' => $request->account_number,
+                'bank_name' => $request->bank_name,
+                'swiss_code' => $request->swiss_code,
+                'reference' => $request->reference,
+                'account_info' => $request->others,
+            ]);
+
+            // Update profile
+            if ($update) {
+                return back()->with('success', 'Profile updated successfully');
+            }
+            return back()->withInput()->with('error', 'Error updating profile');
+
+        }
+
+        if ($request->screen == 'four')
+        {
+            $validator = Validator::make($request->all(), [
+                'coin' => ['sometimes'],
+                'network' => ['sometimes'],
+                'wallet_address' => ['sometimes'],
+            ]);
+
+            if ($validator->fails()) {
+                // Retrieve all error messages
+                $errors = $validator->errors()->all();
+            
+                // Convert errors to a readable string
+                $errorMessage = implode(', ', $errors);
+            
+                return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
+            }
+
+            $user =auth()->user();
+
+            $update = $user->update([
+                'wallet_asset' => $request->coin,
+                'wallet_network' => $request->network,
+                'wallet_address' => $request->wallet_address,
+            ]);
+
+            // Update profile
+            if ($update) {
+                return back()->with('success', 'Profile updated successfully');
+            }
+            return back()->withInput()->with('error', 'Error updating profile');
+
+        }
+
+        if ($request->screen == 'five')
+        {
+            $validator = Validator::make($request->all(), [
+                'ssn' => ['sometimes'],
+                'dob' => ['sometimes'],
+                'location' => ['sometimes'],
+                'country' => ['sometimes'],
+                'state' => ['sometimes'],
+                'postal_code' => ['sometimes'],
+                'address' => ['sometimes'],
+            ]);
+
+            if ($validator->fails()) {
+                // Retrieve all error messages
+                $errors = $validator->errors()->all();
+            
+                // Convert errors to a readable string
+                $errorMessage = implode(', ', $errors);
+            
+                return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
+            }
+
+            $user =auth()->user();
+
+            $update = $user->update([
+                'ssn' => $request->ssn,
+                'dob' => $request->dob,
+                'location' => $request->location,
+                'country' => $request->country,
+                'state' => $request->state,
+                'postal_code' => $request->postal_code,
+                'address' => $request->address,
+            ]);
+
+            // Update profile
+            if ($update) {
+                return back()->with('success', 'Profile updated successfully');
+            }
+            return back()->withInput()->with('error', 'Error updating profile');
+
+        }
+
+        if ($request->screen == 'six')
+        {
+            $validator = Validator::make($request->all(), [
+                'nk_name' => ['sometimes'],
+                'nk_phone' => ['sometimes'],
+                'nk_relationship' => ['sometimes'],
+                'nk_country' => ['sometimes'],
+                'nk_state' => ['sometimes'],
+                'nk_address' => ['sometimes'],
+                'nk_postal' => ['sometimes'],
+            ]);
+
+            if ($validator->fails()) {
+                // Retrieve all error messages
+                $errors = $validator->errors()->all();
+            
+                // Convert errors to a readable string
+                $errorMessage = implode(', ', $errors);
+            
+                return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
+            }
+
+            $user =auth()->user();
+
+            $update = $user->update([
+                'nk_name' => $request->nk_name,
+                'nk_phone' => $request->nk_phone,
+                'nk_relation' => $request->nk_relationship,
+                'nk_country' => $request->nk_country,
+                'nk_state' => $request->nk_state,
+                'nk_address' => $request->nk_address,
+                'nk_postal' => $request->nk_postal,
+            ]);
+
+            // Update profile
+            if ($update) {
+                return back()->with('success', 'Profile updated successfully');
+            }
+            return back()->withInput()->with('error', 'Error updating profile');
+
+        }
+
+        if ($request->screen == 'seven')
+        {
+            // $validator = Validator::make($request->all(), [
+            //     'nk_name' => ['sometimes'],
+            //     'nk_phone' => ['sometimes'],
+            //     'nk_relationship' => ['sometimes'],
+            //     'nk_country' => ['sometimes'],
+            //     'nk_state' => ['sometimes'],
+            //     'nk_address' => ['sometimes'],
+            //     'nk_postal' => ['sometimes'],
+            // ]);
+
+            // if ($validator->fails()) {
+            //     // Retrieve all error messages
+            //     $errors = $validator->errors()->all();
+            
+            //     // Convert errors to a readable string
+            //     $errorMessage = implode(', ', $errors);
+            
+            //     return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
+            // }
+
+            $user =auth()->user();
+            $data = null;
+
+            if ($request->identification){
+                if ($oldAvatar = auth()->user()['identification'])
+                    try {unlink($oldAvatar);}
+                    catch(\Exception $e){}
+                $destinationPath = 'assets/identification'; // upload path
+                static::createDirectoryIfNotExists($destinationPath);
+                $transferImage = \auth()->user()['id'].'-'. time() . '.' . $request['identification']->getClientOriginalExtension();
+                $image = Image::make($request->file('identification'));
+                $image->save($destinationPath . '/' . $transferImage, 40);
+                $data = $destinationPath ."/".$transferImage;
+            }
+
+            $update = $user->update([
+                'identification' => $data,
+            ]);
+
+            // Update profile
+            if ($update) {
+                return back()->with('success', 'Profile updated successfully');
+            }
+            return back()->withInput()->with('error', 'Error updating profile');
+
+        }
+
+        if ($request->screen == 'eight')
+        {
+            // $validator = Validator::make($request->all(), [
+            //     'nk_name' => ['sometimes'],
+            //     'nk_phone' => ['sometimes'],
+            //     'nk_relationship' => ['sometimes'],
+            //     'nk_country' => ['sometimes'],
+            //     'nk_state' => ['sometimes'],
+            //     'nk_address' => ['sometimes'],
+            //     'nk_postal' => ['sometimes'],
+            // ]);
+
+            // if ($validator->fails()) {
+            //     // Retrieve all error messages
+            //     $errors = $validator->errors()->all();
+            
+            //     // Convert errors to a readable string
+            //     $errorMessage = implode(', ', $errors);
+            
+            //     return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
+            // }
+
+            // $user =auth()->user();
+
+            // $update = $user->update([
+            //     'nk_name' => $request->nk_name,
+            //     'nk_phone' => $request->nk_phone,
+            //     'nk_relation' => $request->nk_relationship,
+            //     'nk_country' => $request->nk_country,
+            //     'nk_state' => $request->nk_state,
+            //     'nk_address' => $request->nk_address,
+            //     'nk_postal' => $request->nk_postal,
+            // ]);
+
+            // Update profile
+            // if ($update) {
+                return back()->with('success', 'Profile updated successfully');
+            // }
+            // return back()->withInput()->with('error', 'Error updating profile');
+
+        }
+    }
+
+    public function storeKYC(Request $request)
+    {
+        // dd($request->all());
+
+        // return back()->with('success', 'Profile updated successfully');
+        return redirect()->route('profile')->with('success', 'KYC stored successfully');
+    }
+
+    public function userMode(Request $request)
+    {
+        $user = auth()->user();
+
+        if($user->mode == 'light')
+        {
+            $user->update([
+                'mode' => 'dark',
+            ]);
+        } elseif ($user->mode == 'dark')
+        {
+            $user->update([
+                'mode' => 'light',
+            ]);
+        }
+
+        return back()->with('primary', 'User Mode Changed');
+    }
+
+    public function storeWatchlist(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:crypto,stocks',
+            'data_id' => 'required|integer',
+        ]);
+
+        $userId = auth()->id();
+
+        // Check if the item already exists
+        $watchlist = Watchlist::where('user_id', $userId)
+            ->where('type', $request->type)
+            ->where('data_id', $request->data_id)
+            ->first();
+
+        if ($watchlist) {
+            // If it exists, remove it (unwatch)
+            $watchlist->delete();
+            return response()->json([
+                'status' => 'removed',
+                'message' => 'Item removed from your watchlist.',
+            ], 200);
+        } else {
+            // Otherwise, add it to the watchlist
+            Watchlist::create([
+                'user_id' => $userId,
+                'type' => $request->type,
+                'data_id' => $request->data_id,
+            ]);
+
+            return response()->json([
+                'status' => 'added',
+                'message' => 'Item added to your watchlist.',
+            ], 200);
+        }
+    
+    }
 }

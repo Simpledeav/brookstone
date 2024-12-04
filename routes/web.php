@@ -1,18 +1,20 @@
 <?php
 
-
+use App\Http\Controllers\API\HomeController;
+use App\Http\Controllers\API\InvestmentController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\WalletController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\SavingsController;
-use App\Http\Controllers\SupportController;
-use App\Http\Controllers\TradingController;
-use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\Auth\EmailverificationController;
+use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\HomeController as ControllersHomeController;
+use App\Http\Controllers\SavingsController;
+use App\Http\Controllers\SupportController;
 use App\Http\Controllers\TradeController as ControllersTradeController;
+use App\Http\Controllers\TradingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,7 +52,6 @@ Route::get('/terms', [FrontendController::class, 'terms'])->name('terms');
 
 
 
-
 Auth::routes(['verify' => true]);
 
 Route::get('/auth/{provider}/attempt', [App\Http\Controllers\Auth\SocialController::class, 'redirect'])->name('auth.social.attempt');
@@ -73,6 +74,7 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
     Route::get('/profile', [App\Http\Controllers\HomeController::class, 'profile'])->name('profile');
     Route::post('/password/custom/update', [App\Http\Controllers\HomeController::class, 'changePassword'])->name('password.custom.update');
     Route::post('/profile/update', [App\Http\Controllers\HomeController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/update/settings', [App\Http\Controllers\HomeController::class, 'tabUpdates'])->name('profile.data');
     // Route::get('/getStates/{name}', [App\Http\Controllers\HomeController::class, 'getState'])->name('user.getstate');
     Route::get('/settings', [App\Http\Controllers\HomeController::class, 'settings'])->name('settings');
 
@@ -91,7 +93,7 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
         Route::get('/trades', [App\Http\Controllers\TradeController::class, 'index'])->name('trades');
         Route::get('/buy', [App\Http\Controllers\TradeController::class, 'showBuyForm'])->name('buy');
         Route::get('/sell', [App\Http\Controllers\TradeController::class, 'showSellForm'])->name('sell');
-        // Route::get('/market/chart', [App\Http\Controllers\HomeController::class, 'market'])->name('market');
+        Route::get('/market/chart', [App\Http\Controllers\HomeController::class, 'market'])->name('market');
         Route::get('/wallet', [App\Http\Controllers\WalletController::class, 'index'])->name('wallet');
         Route::get('/referrals', [App\Http\Controllers\ReferralController::class, 'index'])->name('referrals');
         Route::get('/notifications', [App\Http\Controllers\NotificationController::class, 'index'])->name('notifications');
@@ -112,12 +114,18 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
         
         Route::get('/savings/packages', [SavingsController::class, 'packages'])->name('savingsPackage');
         Route::get('/savings/create', [SavingsController::class, 'create'])->name('savings.create');
-        Route::post('/savings/store', [SavingsController::class, 'save'])->name('savings.store');
+        Route::post('/savings/store', [SavingsController::class, 'store'])->name('savings.store');
         Route::get('/savings', [SavingsController::class, 'index'])->name('savings');
         Route::get('/savings/{savings}/show', [SavingsController::class, 'show'])->name('savings.show');
         Route::post('/payment/{savings}', [SavingsController::class, 'makePayment'])->name('make.payment');
         Route::post('/savings/{savings}/settle', [SavingsController::class, 'settlePayment'])->name('settle.payment');
         Route::get('/savings/history', [SavingsController::class, 'history'])->name('savings.history');
+        Route::post('/savings/plan/payment/{savings}', [SavingsController::class, 'savingsPayment'])->name('savings.payment');
+
+        // Interest for Admin
+        Route::get('/savings/interest/{savings}', [SavingsController::class, 'savingsInterest'])->name('savings.interest');
+        Route::post('/savings/interest/{saveTransaction}/withdraw', [SavingsController::class, 'withdrawInterest'])->name('interest.withdaw');
+
 
         Route::get('/test/jods', [App\Http\Controllers\CommandController::class, 'handleSavings']);
 
@@ -150,6 +158,14 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
         Route::get('/user/crypto/view/{stock}', [TradingController::class, 'showCyptoTrade'])->name('asset.view');
         Route::post('/asset/{trade}/close/all', [TradingController::class, 'closeAllAssets'])->name('asset.close.all');
 
+        //:: For Developmenent :://
+
+        // Route::get('/wallet-balance/reset', [WalletController::class, 'walletReset'])->name('wallet.reset');
+        Route::get('/investment/profit/{investment}', [App\Http\Controllers\InvestmentController::class, 'storeProfit'])->name('invest.profit');
+
+        //:: For Developmenent :://
+
+        Route::get('/wallet/deposit', [WalletController::class, 'depo'])->name('wallet.deposit');
 
         Route::get('/support/ticket', [SupportController::class, 'index'])->name('support.index');
         Route::get('/support/ticket/{support}', [SupportController::class, 'show'])->name('support.show');
@@ -157,5 +173,16 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
         Route::post('/support/ticket/store', [SupportController::class, 'store'])->name('support.store');
         Route::delete('/support/ticket/{id}', [SupportController::class, 'destroy'])->name('support.destroy');
         Route::post('/support/ticket/{support}/respond', [SupportController::class, 'reply'])->name('support.reply');
+
+        Route::get('/update/kyc', [App\Http\Controllers\HomeController::class, 'user_kyc'])->name('kyc.index');
+        Route::post('/update/kyc/submit', [App\Http\Controllers\HomeController::class, 'storeKYC'])->name('kyc.post');
+        Route::get('/start/savings/{id}', [App\Http\Controllers\SavingsController::class, 'questionaire'])->name('savings.start');
+
+        Route::get('/fetch/plans', [SavingsController::class, 'fetchPlan'])->name('get.plans');
+        Route::get('/fetch/plans/{id}', [SavingsController::class, 'getPlanDetails'])->name('plans.savings');
+        Route::post('/support/ticket/{support}/respond', [SupportController::class, 'reply'])->name('support.reply');
+
+        Route::post('/user/mode', [App\Http\Controllers\HomeController::class, 'userMode'])->name('change.mode');
+        Route::post('/watchlist', [App\Http\Controllers\HomeController::class, 'storeWatchlist'])->name('add.watchlist');
     // });
 });

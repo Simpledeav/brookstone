@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Email;
 use App\Models\Stock;
 use App\Models\Crypto;
+use App\Models\Ledger;
 use App\Models\Saving;
 use App\Models\Payment;
 use App\Models\Setting;
@@ -14,6 +15,9 @@ use App\Models\Referral;
 use App\Models\Investment;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
@@ -359,110 +363,90 @@ class CommandController extends Controller
 
     public static function updateStocks($command) 
     {
-        // Fetch stock data from an external API (replace with actual API)
-        $apiUrl = 'https://financialmodelingprep.com/api/v3/quote/AAPL,GOOGL,AMZN,MSFT,TSLA,FB,JPM,V,A,PG,JNJ,MA,NVDA,UNH,BRK.B,HD,DIS,INTC,VZ,PYPL,CMCSA,PFE,ADBE,CRM,XOM,CSCO,IBM,ABT,ACN,BAC,ORCL,COST,TMO,ABBV,NFLX,T,XEL,MDT,NKE,AMGN,CVS,TMUS,DHR,LMT,NEE,HON,BMY,COP?apikey=BxRzCvi46ZOnN32A2sIGuhGEsH9Mksw7'; // Replace with your real API
-        $response = Http::get($apiUrl);
+        $stockSymbols = DB::table('stocks')->pluck('symbol')->chunk(100); // Chunk to handle large data sets
+        $command->info("Starting stock updates...");
 
-        // Check if API request was successful
-        if ($response->successful()) {
-            $stocksData = $response->json(); // Assuming this returns a list of stocks data
+        foreach ($stockSymbols as $chunk) {
+            $symbolString = implode(',', $chunk->toArray());
+            $apiUrl = "https://financialmodelingprep.com/api/v3/quote/{$symbolString}?apikey=ExYlr0LoPC6GqCmzuScjwq79Fn4Krx77";
 
-            // Iterate through the stocks returned from the API
-            foreach ($stocksData as $stockData) {
-                try {
-                    // Attempt to find the stock by symbol in the database
-                    $stock = Stock::where('symbol', $stockData['symbol'])->first();
+            $response = Http::get($apiUrl);
 
-                    // Only update if the stock exists in the database
-                    if ($stock) {
-                        // Update only the price and related fields
-                        $stock->update([
-                            'price' => $stockData['price'],
-                            'changes_percentage' => $stockData['changesPercentage'], // Changed key to match API
-                            'change' => $stockData['change'],
-                            'day_low' => $stockData['dayLow'], // Changed key to match API
-                            'day_high' => $stockData['dayHigh'], // Changed key to match API
-                            'year_low' => $stockData['yearLow'], // Changed key to match API
-                            'year_high' => $stockData['yearHigh'], // Changed key to match API
-                            'market_cap' => $stockData['marketCap'], // Changed key to match API
-                            'price_avg_50' => $stockData['priceAvg50'], // Changed key to match API
-                            'price_avg_200' => $stockData['priceAvg200'], // Changed key to match API
-                            'volume' => $stockData['volume'],
-                            'avg_volume' => $stockData['avgVolume'], // Changed key to match API
-                            'open' => $stockData['open'],
-                            'previous_close' => $stockData['previousClose'], // Changed key to match API
-                            'eps' => $stockData['eps'],
-                            'pe' => $stockData['pe'],
-                        ]);
-                        $command->info("Updated stock: {$stock->symbol}");
-                    } else {
-                        $command->warn("Stock with symbol {$stockData['symbol']} not found.");
-                    }
-                } catch (\Exception $e) {
-                    // Log any errors encountered while processing a stock
-                    Log::error("Error updating stock {$stockData['symbol']}: " . $e->getMessage());
+            if ($response->successful()) {
+                foreach ($response->json() as $data) {
+                    DB::table('stocks')->updateOrInsert(
+                        ['symbol' => $data['symbol']],
+                        [
+                            'price' => $data['price'],
+                            'changes_percentage' => $data['changesPercentage'],
+                            'change' => $data['change'],
+                            'day_low' => $data['dayLow'],
+                            'day_high' => $data['dayHigh'],
+                            'year_low' => $data['yearLow'],
+                            'year_high' => $data['yearHigh'],
+                            'market_cap' => $data['marketCap'],
+                            'price_avg_50' => $data['priceAvg50'],
+                            'price_avg_200' => $data['priceAvg200'],
+                            'volume' => $data['volume'],
+                            'avg_volume' => $data['avgVolume'],
+                            'open' => $data['open'],
+                            'previous_close' => $data['previousClose'],
+                            'eps' => $data['eps'],
+                            'pe' => $data['pe'],
+                        ]
+                    );
+                    $command->info("Updated stock: {$data['symbol']}");
                 }
+            } else {
+                Log::error("Failed to fetch stock data. Status: " . $response->status());
+                $command->error("Failed to fetch stock data for chunk: " . $symbolString);
             }
-        } else {
-            // Log if the API request fails
-            Log::error("Failed to fetch stock data. Status: " . $response->status());
-            $command->error('Failed to fetch stock data.');
         }
+        $command->info("Stock updates completed.");
+    }
 
-        $cryptos = [
-            ['symbol' => 'BTCUSD', 'name' => 'Bitcoin', 'img' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Bitcoin.svg/1200px-Bitcoin.svg.png'],
-            ['symbol' => 'ETHUSD', 'name' => 'Ethereum', 'img' => 'https://upload.wikimedia.org/wikipedia/commons/0/05/Ethereum_logo_2014.svg'],
-            ['symbol' => 'USDTUSD', 'name' => 'Tether (USDT)', 'img' => 'https://cryptologos.cc/logos/tether-usdt-logo.png'],
-            ['symbol' => 'BNBUSD', 'name' => 'Binance Coin', 'img' => 'https://cryptologos.cc/logos/binance-coin-bnb-logo.png'],
-            ['symbol' => 'XRPUSD', 'name' => 'XRP (Ripple)', 'img' => 'https://cryptologos.cc/logos/xrp-xrp-logo.png'],
-            ['symbol' => 'ADAUSD', 'name' => 'Cardano', 'img' => 'https://cryptologos.cc/logos/cardano-ada-logo.png'],
-            ['symbol' => 'SOLUSD', 'name' => 'Solana', 'img' => 'https://cryptologos.cc/logos/solana-sol-logo.png'],
-            ['symbol' => 'DOTUSD', 'name' => 'Polkadot', 'img' => 'https://cryptologos.cc/logos/polkadot-new-dot-logo.png'],
-            ['symbol' => 'LTCUSD', 'name' => 'Litecoin', 'img' => 'https://cryptologos.cc/logos/litecoin-ltc-logo.png'],
-            ['symbol' => 'DOGEUSD', 'name' => 'Dogecoin', 'img' => 'https://cryptologos.cc/logos/dogecoin-doge-logo.png'],
-            ['symbol' => 'AVAXUSD', 'name' => 'Avalanche', 'img' => 'https://cryptologos.cc/logos/avalanche-avax-logo.png'],
-            ['symbol' => 'MATICUSD', 'name' => 'Polygon (MATIC)', 'img' => 'https://cryptologos.cc/logos/polygon-matic-logo.png'],
-            ['symbol' => 'UNIUSD', 'name' => 'Uniswap', 'img' => 'https://cryptologos.cc/logos/uniswap-uni-logo.png'],
-            ['symbol' => 'SHIBUSD', 'name' => 'Shiba Inu', 'img' => 'https://cryptologos.cc/logos/shiba-inu-shib-logo.png'],
-            ['symbol' => 'ATOMUSD', 'name' => 'Cosmos', 'img' => 'https://cryptologos.cc/logos/cosmos-atom-logo.png'],
-        ];
-        
-        // Create a comma-separated string of all cryptocurrency symbols
-        $cryptoSymbols = implode(',', array_column($cryptos, 'symbol'));
-        
-        // Fetch cryptocurrency data from financialmodelingprep.com
-        $cryptoApiUrl = "https://financialmodelingprep.com/api/v3/quote/{$cryptoSymbols}?apikey=BxRzCvi46ZOnN32A2sIGuhGEsH9Mksw7";
+    public static function updateCrypto($command)
+    {
+        $stockSymbols = DB::table('cryptos')->pluck('symbol')->chunk(100); // Chunk to handle large data sets
+        $command->info("Starting crypto updates...");
 
-        $cryptoResponse = Http::get($cryptoApiUrl);
+        foreach ($stockSymbols as $chunk) {
+            $symbolString = implode(',', $chunk->toArray());
+            $apiUrl = "https://financialmodelingprep.com/api/v3/quote/{$symbolString}?apikey=ExYlr0LoPC6GqCmzuScjwq79Fn4Krx77";
 
-        // Check if API request for cryptocurrencies was successful
-        if ($cryptoResponse->successful()) {
-            $cryptosData = $cryptoResponse->json(); // Assuming this returns a list of cryptocurrency data
+            $response = Http::get($apiUrl);
 
-            // Iterate through the cryptocurrencies returned from the API
-            foreach ($cryptosData as $cryptoData) {
-                try {
-                    $crypto = Crypto::where('symbol', $cryptoData['symbol'])->first();
-                    if ($crypto) {
-                        $crypto->update([
-                            'price' => $cryptoData['price'],
-                            'market_cap' => $cryptoData['marketCap'], // Ensure this field is available in the response
-                            'volume' => $cryptoData['volume'], // Ensure this field is available in the response
-                            'changes_percentage' => $cryptoData['changesPercentage'], // Assuming it exists in the response
-                            // Add other fields as needed
-                        ]);
-                        $command->info("Updated cryptocurrency: {$crypto->symbol}");
-                    } else {
-                        $command->warn("Cryptocurrency with symbol {$cryptoData['symbol']} not found.");
-                    }
-                } catch (\Exception $e) {
-                    Log::error("Error updating cryptocurrency {$cryptoData['symbol']}: " . $e->getMessage());
+            if ($response->successful()) {
+                foreach ($response->json() as $data) {
+                    DB::table('cryptos')->updateOrInsert(
+                        ['symbol' => $data['symbol']],
+                        [
+                            'price' => $data['price'] ?? 0,
+                            'changes_percentage' => $data['changesPercentage'] ?? 0,
+                            'change' => $data['change'] ?? 0,
+                            'day_low' => $data['dayLow'] ?? 0,
+                            'day_high' => $data['dayHigh'] ?? 0,
+                            'year_low' => $data['yearLow'] ?? 0,
+                            'year_high' => $data['yearHigh'] ?? 0,
+                            'market_cap' => $data['marketCap'] ?? 0,
+                            'price_avg_50' => $data['priceAvg50'] ?? 0,
+                            'price_avg_200' => $data['priceAvg200'] ?? 0,
+                            'volume' => $data['volume'] ?? 0,
+                            'avg_volume' => $data['avgVolume'] ?? 0,
+                            'open' => $data['open'] ?? 0,
+                            'previous_close' => $data['previousClose'] ?? 0,
+                            'eps' => $data['eps'] ?? 0, // Assuming 'eps' might be included in the response, if not it defaults to 0
+                            'pe' => $data['pe'] ?? 0,   // Assuming 'pe' might be included in the response, if not it defaults to 0
+                        ]
+                    );
+                    $command->info("Updated stock: {$data['symbol']}");
                 }
+            } else {
+                Log::error("Failed to fetch stock data. Status: " . $response->status());
+                $command->error("Failed to fetch stock data for chunk: " . $symbolString);
             }
-        } else {
-            Log::error("Failed to fetch cryptocurrency data. Status: " . $cryptoResponse->status());
-            $command->error('Failed to fetch cryptocurrency data.');
         }
+        $command->info("Stock updates completed.");
     }
 
     public static function distributeProfit($command)
@@ -495,22 +479,30 @@ class CommandController extends Controller
             $profit_for_today = ($profit_percentage * $total_profit) / 100;
 
             if (self::shouldDistributeProfit($investment, $remaining_days)) {
-                // Credit user's wallet
-                $investment->user->investmentWallet->increment('balance', $profit_for_today);
 
-                // Create a wallet transaction for the profit
-                $investment->investmentTransactions()->create(
-                    [
-                        'user_id' => $investment->user->id,
-                        'amount' => $profit_for_today,
-                        'type' => 'deposit',
-                        'account_type' => 'investment',
-                        'description' => '$'. $profit_for_today . ' profit on ' . $investment->package->name,
-                        'method' => 'wallet',
-                        'status' => 'approved',
-                        'is_profit' => 1
-                    ]
-                );
+                //Create Transaction
+                $transaction = $investment->user->transaction('invest')->create([
+                    'amount' => $profit_for_today,
+                    'data_id' => $investment->id,
+                    'status' => 'approved',
+                    'description' =>  '$'. $profit_for_today . ' profit on ' . $investment->package->name,
+                    'method' => 'credit'
+                ]);
+
+                //Create Investment Transaction
+                $investment->investmentTransaction()->create([
+                    'amount' => $profit_for_today,
+                    'type' => 'credit',
+                    'status' => 'success',
+                ]);
+
+                // ::::: Store Ledger :::::: //
+                try {
+                    Ledger::credit($investment->user->wallet, $profit_for_today, 'invest', null, '$'. $profit_for_today . ' profit on ' . $investment->package->name);
+                } catch (InvalidArgumentException $e) {
+                    return back()->with('error', 'Error debiting wallet: ' . $e->getMessage());
+                }
+                // ::::: Store Ledger :::::: //
 
                 Log::info('Profit to distribute today: ' . $profit_for_today);
             }

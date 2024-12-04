@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ledger;
+use App\Models\Wallet;
 use App\Models\Setting;
+use App\Models\AccountCoin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 
@@ -46,6 +51,21 @@ class WalletController extends Controller
         $alignedTrading = $transact->where('type', 'trade')->pluck('total_amount');
         $dates = $transact->pluck('date')->unique()->values(); // Get unique dates
 
+        $inv = $user->investments()->where('status', 'active')->sum('amount');
+
+        $sav = $user->savings()
+            ->with(['savingsTransactions' => function($query) {
+                $query->where('type', 'debit')->where('status', 'success');
+            }])
+            ->get()
+            ->pluck('savingsTransactions')
+            ->flatten()
+            ->sum('amount') ?? 0;
+
+        $trd = $user->trades('stocks')->sum('amount') + $user->trades('crypto')->sum('amount');
+
+        $lockedFunds = ($inv + $sav + $trd);
+
         // Pass data to view
         return view('user_.wallet.index', [ 
             'title' => 'Wallets', 
@@ -63,22 +83,111 @@ class WalletController extends Controller
             'alignedSavings' => $alignedSavings->values(),
             'alignedInvestments' => $alignedInvestments->values(),
             'alignedTrading' => $alignedTrading->values(),
+            'lockedFunds' => $lockedFunds,
         ]);
+    }
+
+    public function depo()
+    {
+        $setting = Setting::all()->first();
+
+        return view('user_.wallet.deposit', ['setting' => $setting]);
     }
 
     public function deposit(Request $request)
     {
+        // dd($request->all());
+
+        // Check logic
+        if($request->logic !== 'deposit') {
+            return back()->with('error', 'Wrong method initiated!');
+        }
+
         // Validate request
         $validator = Validator::make($request->all(), [
             'amount' => ['required', 'numeric', 'gt:0', 'min:10'],
-            'account_type' => ['required'],
         ]);
         if ($validator->fails()){
             return back()->withErrors($validator)->withInput()->with('error', 'Invalid input data');
         }
-        
-        $user = auth()->user();
 
+        $type = 'credit';
+        $user = auth()->user();
+        $status = 'pending';
+        $amount = $request->amount;
+
+        // Check method
+        if($request->method && $request->method == 'coin') {
+            //Crypto Variables
+            $coin = AccountCoin::find($request->coin);
+            if ($coin) {
+                $method = $request->method;
+                $currency = $coin->symbol ?? 'null';
+                $proof = null;
+                $swift = null;
+                $delivering = null;
+                $account = null;
+                $time = null;
+                $value = $request->coinvalue;
+            } else {
+                return back()->withErrors($validator)->withInput()->with('error', 'Invalid Coin or Network, Try again later');
+            }
+        } elseif($request->method && $request->method == 'bank') {
+            $validator = Validator::make($request->all(), [
+                'filepond' => 'required',
+                'filepond.*' => 'file|mimes:jpeg,png,jpg,gif,svg|max:3072', // Max 3MB, adjust as needed
+            ]);
+            if ($validator->fails()){
+                return back()->withErrors($validator)->withInput()->with('error', 'Upload a bank transfer proof!');
+            }
+
+            $proof = null;
+
+            if ($request->filepond) {
+                $fileData = $request->input('filepond'); // Retrieve the base64 data
+                $fileInfo = json_decode($fileData, true);
+                $imageData = $fileInfo['data']; // This contains the base64 image content
+                $imageContent = base64_decode($imageData);
+
+                $fileExtension = pathinfo($fileInfo['name'], PATHINFO_EXTENSION); // Extract extension
+                $fileName = time() . '-' . date('YmdHis') . '.' . $fileExtension; // Generate unique name
+                $path = 'uploads/' . $fileName;
+
+                if (!File::exists(public_path('uploads'))) {
+                    File::makeDirectory(public_path('uploads'), 0755, true);
+                }
+
+                file_put_contents(public_path($path), $imageContent);
+
+                $proof = $path;
+            }
+
+            //Bank Variables
+            $method = $request->method;
+            $currency = 'USD';
+            $swift = $request->swift;
+            $delivering = $request->delivering;
+            $account = $request->account;
+            $time = $request->time;
+            $value = 1;
+        }
+
+        // Create deposit
+        $user->wallet->deposit()->create([
+            'amount' => $amount,
+            'type' => $type,
+            'method' => $method,
+            'currency' => $currency,
+            'proof' => $proof,
+            'swift' => $swift,
+            'delivering' => $delivering,
+            'account' => $account,
+            'time' => $time,
+            'value' => $value,
+            'status' => $status,
+        ]);
+
+        //Create Transaction
         $transaction = $user->transaction('invest')->create([
             'amount' => $request->amount,
             'data_id' => 0,
@@ -89,9 +198,9 @@ class WalletController extends Controller
         ]);
 
         if ($transaction) {
-            // NotificationController::sendDepositQueuedNotification($transaction);
+            NotificationController::sendDepositQueuedNotification($transaction);
             // return redirect()->route('wallet')->with('success', 'Deposit queued successfully');
-            return back()->withInput()->with('success', 'Deposit queued successfully');
+            return redirect()->route('wallet')->with('success', 'Deposit queued successfully');
         }
         return redirect()->route('wallet')->with('error', 'Error processing deposit');
     }
@@ -103,8 +212,8 @@ class WalletController extends Controller
         // Validate request with improved rules
         $validator = Validator::make($request->all(), [
             'amount' => ['required', 'numeric', 'gt:0'],
-            'from_account' => ['required', 'in:investment,savings,trading,wallet'],
-            'to_account' => ['required', 'in:investment,savings,trading'],
+            'from_account' => ['required', 'in:invest,save,trade,wallet'],
+            'to_account' => ['required', 'in:invest,save,trade,wallet'],
         ]);
 
         if ($validator->fails()) {
@@ -120,23 +229,8 @@ class WalletController extends Controller
             return back()->withInput()->with('error', 'Source and destination accounts must be different');
         }
 
-        // Get current balance from the appropriate method based on the from_account
-        switch ($fromAccount) {
-            case 'savings':
-                $fromWalletBalance = $user->wallet->save;
-                break;
-            case 'investment':
-                $fromWalletBalance = $user->wallet->invest;
-                break;
-            case 'trading':
-                $fromWalletBalance = $user->wallet->trade;
-                break;
-            case 'wallet':
-                $fromWalletBalance = $user->wallet->balance;
-                break;
-            default:
-                return back()->withInput()->with('error', 'Invalid source account');
-        }
+        // Calculate balance from the ledger for the appropriate account
+        $fromWalletBalance = $user->wallet->getAccountBalance($user->wallet, $fromAccount);
 
         // Check if the user has enough balance in the source account
         if ($fromWalletBalance < $amount) {
@@ -146,47 +240,22 @@ class WalletController extends Controller
         // Start transaction to ensure atomicity
         DB::beginTransaction();
         try {
-            // Increment the balance of the destination account
-            switch ($toAccount) {
-                case 'savings':
-                    $user->updateWalletBalance('savings', $amount, 'increment');
-                    break;
-                case 'investment':
-                    $user->updateWalletBalance('investment', $amount, 'increment');
-                    break;
-                case 'trading':
-                    $user->updateWalletBalance('trading', $amount, 'increment');
-                    break;
-                default:
-                    return back()->withInput()->with('error', 'Invalid destination account');
-            }
+            // Debit the source account via ledger
+            Ledger::debit($user->wallet, $amount, $fromAccount, null, 'Transfer to ' . $toAccount);
 
-            // Decrement the balance of the source account
-            switch ($fromAccount) {
-                case 'savings':
-                    $user->updateWalletBalance('savings', $amount, 'decrement');
-                    break;
-                case 'investment':
-                    $user->updateWalletBalance('investment', $amount, 'decrement');
-                    break;
-                case 'trading':
-                    $user->updateWalletBalance('trading', $amount, 'decrement');
-                    break;
-                case 'wallet':
-                    $user->updateWalletBalance('balance', $amount, 'decrement');
-                    break;
-            }
+            // Credit the destination account via ledger
+            Ledger::credit($user->wallet, $amount, $toAccount, null, 'Transfer from ' . $fromAccount);
 
             $transaction = $user->transaction('wallet')->create([
                 'amount' => $amount,
                 'data_id' => 0,
                 'type' => 'wallet',
                 'status' => 'approved',
-                'description' => 'Transfer funds',
+                'description' => "Transfer from $fromAccount to $toAccount",
                 'method' => 'credit'
             ]);
 
-            // If everything is fine, commit the transaction
+            // Commit the transaction
             DB::commit();
 
             return back()->with('success', 'Transfer was made successfully');
@@ -202,6 +271,31 @@ class WalletController extends Controller
         }
     }
 
+    public function walletReset()
+    {
+        $user = auth()->user();
+        $wallet = $user->wallet;
+
+        // Helper function to calculate balance for a given account
+        $calculateBalance = function ($account) use ($wallet) {
+            $credits = $wallet->ledgerEntries()->where('account', $account)->where('type', 'credit')->sum('amount') ?? 0;
+            $debits = $wallet->ledgerEntries()->where('account', $account)->where('type', 'debit')->sum('amount') ?? 0;
+            return $credits - $debits;
+        };
+
+        // Calculate balances for each account
+        $updateData = [
+            'balance' => $calculateBalance('balance'),
+            'invest'  => $calculateBalance('invest'),
+            'save'    => $calculateBalance('save'),
+            'trade'   => $calculateBalance('trade'),
+        ];
+
+        // Update the wallet
+        $wallet->update($updateData);
+
+        return response()->json(['wallet' => $wallet]);
+    }
 
 
 
@@ -302,15 +396,17 @@ class WalletController extends Controller
         $account = $request->query('account');
 
         $balance = 0;
-        if ($account === 'savings') {
-            $balance = $user->savingsWalletBalance();
-        } elseif ($account === 'investment') {
-            $balance = $user->investmentWalletBalance();
-        } elseif ($account === 'trading') {
-            $balance = $user->tradingWalletBalance();
+        if ($account === 'save') {
+            $balance = $user->wallet->getAccountBalance($user->wallet, 'save');
+        } elseif ($account === 'invest') {
+            $balance = $user->wallet->getAccountBalance($user->wallet, 'invest');
+        } elseif ($account === 'trade') {
+            $balance = $user->wallet->getAccountBalance($user->wallet, 'trade');
         } elseif ($account === 'wallet') {
-            $balance = $user->portfolioBalance();
+            $balance = $user->wallet->getAccountBalance($user->wallet, 'wallet');
         }
+
+        // dd($balance);
 
         return response()->json(['balance' => $balance]);
     }

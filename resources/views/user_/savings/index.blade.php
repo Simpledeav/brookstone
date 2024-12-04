@@ -27,10 +27,9 @@
 
 <div class="main-content app-content">
     <div class="container-fluid">
-
+    @include('partials.users.alert')
         <!-- Start::page-header -->
-        <div
-            class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div>
                 <h1 class="page-title fw-medium fs-18 mb-2">Savings</h1>
                 <ol class="breadcrumb mb-0">
@@ -76,8 +75,12 @@
                                         </div>
                                         <div class="mt-3">
                                             <h4 class="fw-semibold mb-1">&#36;{{ number_format($balance, 2) }}</h4>
-                                            <span class="text-muted fs-12">Savings Balance<span class="text-success ms-2 d-inline-block">0.45%<i class="ti ti-arrow-narrow-up"></i></span></span>
-
+                                            <span class="text-muted fs-12">Savings Balance
+                                                <!-- <span class="text-success ms-2 d-inline-block">0.45%<i class="ti ti-arrow-narrow-up"></i></span> -->
+                                            </span>
+                                            <div class="mt-2">
+                                                <a href="javascript:void(0);" class="py-2 fs-11 text-muted fw-semibold" data-bs-toggle="modal" data-bs-target="#transferModa" id="openSavingsModal">Withdraw <i class="fe fe-arrow-right me-2 align-middle d-inline-block"></i></a>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -109,28 +112,105 @@
                                         </div>
                                         <div class="mt-3">
                                             <h4 class="fw-semibold mb-1">{{ number_format($asv) }}</h4>
-                                            <span class="text-muted fs-12">Active Savings<span class="text-success ms-2 d-inline-block">+$20.80</span></span>
+                                            <span class="text-muted fs-12">Active Savings 
+                                                <!-- <span class="text-success ms-2 d-inline-block">+$20.80</span> -->
+                                            </span>
+                                        </div>
+                                        <div class="mt-2">
+                                            <a href="javascript:void(0);" class="py-2 fs-11 text-white fw-semibold">.</a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="card custom-card">
-                        <div class="card-header d-flex">
-                            <div class="card-title">Savings</div>
-                            <div class="btn-group ms-auto">
-                                <button class="btn btn-success btn-sm" id="one_month">1M</button>
-                                <button class="btn btn-success btn-sm" id="six_months">6M</button>
-                                <button class="btn btn-success btn-sm" id="one_year">1Y</button>
-                                <button class="btn btn-success btn-sm" id="all">ALL</button>
-                                <!-- <button class="btn btn-primary btn-sm" id="ytd">ALL</button> -->
+                    <!-- Start:: row-2 -->
+                    <div class="row">
+                        <div class="col-xxl-12 col-xl-12">
+                            <div class="card custom-card">
+                                <div class="card-header justify-content-between">
+                                    <div class="card-title">
+                                        All Savings 
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-2"> 
+                                        <div> 
+                                            <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example"> 
+                                        </div> 
+                                        <div class="dropdown"> 
+                                            <a href="javascript:void(0);" class="btn btn-primary btn-sm btn-wave waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false"> Sort By<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i> 
+                                            </a> 
+                                            <ul class="dropdown-menu" role="menu"> 
+                                                <li><a class="dropdown-item" href="{{ request()->offsetExists('pending') }}">New</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li> 
+                                                <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li> 
+                                                @if(request()->offsetExists('active'))
+                                                    <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
+                                                    <li class="breadcrumb-item active" aria-current="page">Active</li>
+                                                @elseif(request()->offsetExists('pending'))
+                                                    <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
+                                                    <li class="breadcrumb-item active" aria-current="page">Pending</li>
+                                                @elseif(request()->offsetExists('cancelled'))
+                                                    <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
+                                                    <li class="breadcrumb-item active" aria-current="page">Cancelled</li>
+                                                @elseif(request()->offsetExists('settled'))
+                                                    <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
+                                                    <li class="breadcrumb-item active" aria-current="page">Settled</li>
+                                                @else
+                                                    <li class="breadcrumb-item active" aria-current="page">Savings</li>
+                                                @endif
+                                            </ul> 
+                                        </div> 
+                                    </div>
+                                </div>
+                                <div class="card-body p-0">
+                                    <div class="table-responsive">
+                                        <table class="table text-nowrap">
+                                            <thead>
+                                                <tr>
+                                                    <th>S/N</th>
+                                                    <th>Plan</th>
+                                                    <th>Date</th>
+                                                    <th>Status</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($savings as $key=>$saving)
+                                                    <tr>
+                                                        <td>{{ $key + 1 }}</td>
+                                                        <td>{{ $saving->plan->name }}</td>
+                                                        <td>{{ $saving['created_at']->format('M d, Y \a\t h:i A') }}</td>
+                                                        <td>
+                                                            @if($saving['status'] == 'active')
+                                                                <span class="badge bg-success-transparent"><i class="ri-check-fill align-middle me-1"></i>Active</span>
+                                                            @elseif($saving['status'] == 'pending')
+                                                                <span class="badge bg-warning-transparent"><i class="ri-info-fill align-middle me-1"></i>Pending</span>
+                                                            @elseif($saving['status'] == 'cancelled')
+                                                                <span class="badge bg-danger-transparent"><i class="ri-close-fill align-middle me-1"></i>Cancelled</span>
+                                                            @elseif($saving['status'] == 'settled')
+                                                                <span class="badge bg-light text-dark"><i class="ri-reply-line align-middle me-1"></i>Settled</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>
+                                                            <a href="{{ route('savings.show', $saving['id']) }}" class="btn btn-sm btn-primary">View</a> 
+                                                        </td>
+                                                    </tr>
+                                                @endforeach 
+                                            </tbody>
+                                        </table>
+                                                @if($savings->count() == 0)
+                                                    <tr>
+                                                        <p class="py-4 text-center">
+                                                            No Savings
+                                                        </p>
+                                                    </tr>
+                                                @endif
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div id="area-datetime"></div>
-                        </div>
                     </div>
+                    <!-- End:: row-2 -->
                 </div>
                 <div class="col-xl-3">
                     <div class="row">
@@ -154,7 +234,7 @@
                                                 <span class="d-block fw-medium">Active</span>
                                             </div>
                                             <div>
-                                                <span class="badge d-inline-flex bg-success-transparent">4</span>
+                                                <span class="badge d-inline-flex bg-success-transparent">{{ number_format($asv) }}</span>
                                             </div>
                                         </li>
                                         <li class="d-flex justify-content-between">
@@ -163,7 +243,7 @@
                                                 <span class="d-block fw-medium">Completed</span>
                                             </div>
                                             <div>
-                                                <span class="badge d-inline-flex bg-secondary-transparent">0</span>
+                                                <span class="badge d-inline-flex bg-secondary-transparent">{{ number_format($csv) }}</span>
                                             </div>
                                         </li>
                                         <li class="d-flex justify-content-between">
@@ -172,7 +252,7 @@
                                                 <span class="d-block fw-medium">Settled</span>
                                             </div>
                                             <div>
-                                                <span class="badge d-inline-flex bg-primary-transparent">8</span>
+                                                <span class="badge d-inline-flex bg-primary-transparent">{{ number_format($ssv) }}</span>
                                             </div>
                                         </li>
                                     </ul>
@@ -188,6 +268,7 @@
                                 </div>
                                 <div class="card-body">
                                     <ul class="list-unstyled recent-transactions-list">
+                                        @foreach($profit as $data)
                                         <li>
                                             <div class="d-flex align-items-start gap-3">
                                                 <div class="flex-fill">
@@ -199,39 +280,10 @@
                                                 </div>
                                             </div>
                                         </li>
-                                        <li>
-                                            <div class="d-flex align-items-start gap-3">
-                                                <div class="flex-fill">
-                                                    <span class="d-block fw-medium">Yesterday</span>
-                                                    <span class="text-muted fs-12">14, Jun 2024 - 10:15AM</span>
-                                                </div>
-                                                <div>
-                                                    <span class="d-block fw-medium">+532.76</span>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="d-flex align-items-start gap-3">
-                                                <div class="flex-fill">
-                                                    <span class="d-block fw-medium">Tuesday</span>
-                                                    <span class="text-muted fs-12">28, Apr 2024 - 03:36PM</span>
-                                                </div>
-                                                <div>
-                                                    <span class="d-block fw-medium">-1,432.00</span>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="d-flex align-items-start gap-3">
-                                                <div class="flex-fill">
-                                                    <span class="d-block fw-medium">Monday</span>
-                                                    <span class="text-muted fs-12">29, Apr 2024 - 01:18PM</span>
-                                                </div>
-                                                <div>
-                                                    <span class="d-block fw-medium text-success">+$29.00</span>
-                                                </div>
-                                            </div>
-                                        </li>
+                                        @endforeach
+                                        @if($profit == null)
+                                            <p class="text-center my-5 py-4">No transactions</p>
+                                        @endif
                                     </ul>
                                 </div>
                             </div>
@@ -241,124 +293,7 @@
             </div>
         </div>
         <!-- End:: row-1 -->
-
-            <!-- Start:: row-2 -->
-            <div class="row">
-                <div class="col-xxl-12 col-xl-12">
-                    <div class="card custom-card">
-                        <div class="card-header justify-content-between">
-                            <div class="card-title">
-                                All Savings 
-                            </div>
-                            <div class="d-flex flex-wrap gap-2"> 
-                                <div> 
-                                    <input class="form-control form-control-sm" type="text" placeholder="Search Here" aria-label=".form-control-sm example"> 
-                                </div> 
-                                <div class="dropdown"> 
-                                    <a href="javascript:void(0);" class="btn btn-primary btn-sm btn-wave waves-effect waves-light" data-bs-toggle="dropdown" aria-expanded="false"> Sort By<i class="ri-arrow-down-s-line align-middle ms-1 d-inline-block"></i> 
-                                    </a> 
-                                    <ul class="dropdown-menu" role="menu"> 
-                                        <li><a class="dropdown-item" href="{{ request()->offsetExists('pending') }}">New</a></li> 
-                                        <li><a class="dropdown-item" href="javascript:void(0);">Popular</a></li> 
-                                        <li><a class="dropdown-item" href="javascript:void(0);">Relevant</a></li> 
-                                        @if(request()->offsetExists('active'))
-                                            <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
-                                            <li class="breadcrumb-item active" aria-current="page">Active</li>
-                                        @elseif(request()->offsetExists('pending'))
-                                            <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
-                                            <li class="breadcrumb-item active" aria-current="page">Pending</li>
-                                        @elseif(request()->offsetExists('cancelled'))
-                                            <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
-                                            <li class="breadcrumb-item active" aria-current="page">Cancelled</li>
-                                        @elseif(request()->offsetExists('settled'))
-                                            <li class="breadcrumb-item"><a href="{{ route('savings') }}">Savings</a></li>
-                                            <li class="breadcrumb-item active" aria-current="page">Settled</li>
-                                        @else
-                                            <li class="breadcrumb-item active" aria-current="page">Savings</li>
-                                        @endif
-                                    </ul> 
-                                </div> 
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="table-responsive">
-                                <table class="table text-nowrap">
-                                    <thead>
-                                        <tr>
-                                        <th>S/N</th>
-                                        <th>Deposit</th>
-                                        <th>Contribution</th>
-                                        <th>ROI</th>
-                                        <th>Days left</th>
-                                        <th>Reuturn</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @foreach($savings as $key=>$saving)
-                                        @php 
-                                            $paid = $saving->transaction()->where('status', 'approved')->count();
-                                            $now = \Carbon\Carbon::now();
-                                            $returnDate = \Carbon\Carbon::parse($saving['return_date']);
-                                            $daysLeft = $now->diffInDays($returnDate, false);
-                                        @endphp
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>${{ number_format($saving['deposit'], 2) }}</td>
-                                                <td>${{ number_format($saving['contribution'], 2) }} ({{ $saving['timeframe'] }})</td>
-                                                <td>
-                                                    <span class="badge bg-light text-dark fs-15">
-                                                        {{ number_format($saving['roi'], 0) }}<i class="ti ti-percentage fs-15"></i>
-                                                    </span>
-                                                </td>
-                                                <td> 
-                                                    @if ($daysLeft > 0)
-                                                        {{ $daysLeft }} days left
-                                                    @elseif ($daysLeft == 0)
-                                                        {{ $returnDate->diffInHours($now) }} hours left
-                                                    @else
-                                                        --
-                                                    @endif
-                                                </td>
-                                                <td>${{ number_format($saving['total_return'], 2)  }}</td>
-                                                <td>{{ $saving['created_at']->format('M d, Y \a\t h:i A') }}</td>
-                                                <td>
-                                                    @if($saving['status'] == 'active')
-                                                        @if($saving['return_date']->diffInDays(now()) >= 1)
-                                                            <span class="badge bg-success-transparent"><i class="ri-check-fill align-middle me-1"></i>Active</span>
-                                                        @else
-                                                            <span class="badge bg-light text-dark"><i class="ri-check-fill align-middle me-1"></i>Completed</span>
-                                                        @endif
-                                                    @elseif($saving['status'] == 'pending')
-                                                        <span class="badge bg-warning-transparent"><i class="ri-info-fill align-middle me-1"></i>Pending</span>
-                                                    @elseif($saving['status'] == 'cancelled')
-                                                        <span class="badge bg-danger-transparent"><i class="ri-close-fill align-middle me-1"></i>Cancelled</span>
-                                                    @elseif($saving['status'] == 'settled')
-                                                        <span class="badge bg-light text-dark"><i class="ri-reply-line align-middle me-1"></i>Settled</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <a href="{{ route('savings.show', $saving['id']) }}" class="btn btn-sm btn-primary">View</a> 
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
-                                </table>
-                                        @if($savings->count() == 0)
-                                            <tr>
-                                                <p class="py-4 text-center">
-                                                    No Savings
-                                                </p>
-                                            </tr>
-                                        @endif
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- End:: row-2 -->
+        @include('partials.users.modal.topup')
     </div>
 </div>
 <!-- End::app-content -->

@@ -1,7 +1,5 @@
 @extends('layouts.user.auth')
 
-@section('title', '| Reset password')
-
 @section('content')
     <div class="col-md-8 pl-md-0">
         <div class="auth-form-wrapper px-4 py-5">

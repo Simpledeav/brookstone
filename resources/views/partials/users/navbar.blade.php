@@ -10,10 +10,10 @@
                 <div class="header-element">
                     <div class="horizontal-logo">
                         <a href="index.html" class="header-logo">
-                            <img src="../assets/images/brand-logos/desktop-logo.png" alt="logo" class="desktop-logo">
-                            <img src="../assets/images/brand-logos/toggle-logo.png" alt="logo" class="toggle-logo">
-                            <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark">
-                            <img src="../assets/images/brand-logos/toggle-dark.png" alt="logo" class="toggle-dark">
+                            <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="desktop-logo">
+                            <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="toggle-logo">
+                            <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="desktop-dark">
+                            <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="toggle-dark">
                         </a>
                     </div>
                 </div>
@@ -46,9 +46,12 @@
 
                 <!-- Start::header-element -->
                 <li class="header-element header-theme-mode">
+                    <form id="modeChangeForm" action="{{ route('change.mode') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
                     <!-- Start::header-link|layout-setting -->
                     <a href="javascript:void(0);" class="header-link layout-setting">
-                        <span class="light-layout">
+                        <span class="light-layout" onclick="submitMethod()">
                             <!-- Start::header-link-icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon"
                                 enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px"
@@ -62,7 +65,7 @@
                             </svg>
                             <!-- End::header-link-icon -->
                         </span>
-                        <span class="dark-layout">
+                        <span class="dark-layout" onclick="submitMethod()">
                             <!-- Start::header-link-icon -->
                             <svg xmlns="http://www.w3.org/2000/svg" class="header-link-icon"
                                 enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px"
@@ -216,13 +219,13 @@
                         </li>
                         <li><a class="dropdown-item d-flex align-items-center" href="{{ route('profile') }}"><i
                                     class="ti ti-user me-2 fs-18 text-primary"></i>Profile</a></li>
-                        <li><a class="dropdown-item d-flex align-items-center" href="mail.html"><i
-                                    class="ti ti-mail me-2 fs-18 text-primary"></i>Inbox</a></li>
-                        <li><a class="dropdown-item d-flex align-items-center" href="to-do-list.html"><i
-                                    class="ti ti-checklist me-2 fs-18 text-primary"></i>Task Manager</a></li>
-                        <li><a class="dropdown-item d-flex align-items-center" href="mail-settings.html"><i
-                                    class="ti ti-settings me-2 fs-18 text-primary"></i>Settings</a></li>
-                        <li><a class="dropdown-item d-flex align-items-center" href="chat.html"><i
+                        <!-- <li><a class="dropdown-item d-flex align-items-center" href="mail.html"><i
+                                    class="ti ti-mail me-2 fs-18 text-primary"></i>Inbox</a></li> -->
+                        <!-- <li><a class="dropdown-item d-flex align-items-center" href="to-do-list.html"><i
+                                    class="ti ti-checklist me-2 fs-18 text-primary"></i>Task Manager</a></li> -->
+                        <li><a class="dropdown-item d-flex align-items-center" href="{{ route('wallet.deposit') }}"><i
+                                    class="ti ti-cash me-2 fs-18 text-primary"></i>Deposit</a></li>
+                        <li><a class="dropdown-item d-flex align-items-center" href="{{ route('support.index') }}"><i
                                     class="ti ti-headset me-2 fs-18 text-primary"></i>Support</a></li>
                         <li>
                             <form action="{{ route('logout') }}" method="post">
@@ -262,3 +265,9 @@
         <!-- End::main-header-container -->
 
     </header>
+
+    <script>
+        function submitMethod() {
+            document.getElementById('modeChangeForm').submit();
+        }
+    </script>

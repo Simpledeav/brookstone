@@ -30,6 +30,21 @@ class Saving extends Model
     {
         return $this->hasOne(Transaction::class);
     }
+
+    public function plan()
+    {
+        return $this->belongsTo(Plan::class);
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(SavingsAnswer::class);
+    }
+
+    public function getQuestion()
+    {
+        return $this->belongsTo(Question::class);
+    }
     
     public function isReadyForDeduction()
     {
@@ -55,8 +70,8 @@ class Saving extends Model
         }
     }
 
-    public function savingsTransactions(): MorphMany
+    public function savingsTransactions(): HasMany
     {
-        return $this->morphMany(WalletsTransactions::class, 'transactable');
+        return $this->hasMany(SaveTransaction::class);
     }
 }

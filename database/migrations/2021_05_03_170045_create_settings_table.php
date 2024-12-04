@@ -15,16 +15,20 @@ class CreateSettingsTable extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('bank_name')->nullable();
+            $table->text('crypto_note')->nullable();
+            $table->text('bank_note_initial')->nullable();
+            $table->text('bank_note_final')->nullable();
+            $table->string('bank_address')->nullable();
             $table->string('account_name')->nullable();
             $table->string('account_number')->nullable();
-            $table->string('referral_earning')->nullable();
-            $table->string('gold_to_usd')->default(0);
-            $table->string('silver_to_usd')->default(0);
-            $table->string('usd_to_ngn')->default(0);
-            $table->string('gram_to_ounce')->default(0);
-            $table->string('buy_rate_plus')->default(0);
-            $table->string('sell_rate_plus')->default(0);
+            $table->string('bank_name')->nullable();
+            $table->string('swift_code')->nullable();
+            $table->string('bank_phone')->nullable();
+            $table->string('bank_country')->nullable();
+            $table->string('bank_state')->nullable();
+            $table->string('bank_address_address')->nullable();
+            $table->string('bank_reference')->nullable();
+
             $table->boolean('show_cash')->default(true);
             $table->boolean('invest')->default(true);
             $table->boolean('rollover')->default(true);
@@ -43,10 +47,20 @@ class CreateSettingsTable extends Migration
         });
 
         \App\Models\Setting::create([
-            'referral_earning' => 0,
-            'bank_name' => 'Access Bank',
+            'bank_address' => 'Bell Str 1157 City',
+            'bank_phone' => '0123456789',
+            'bank_country' => 'United State',
+            'bank_state' => 'Texas',
+            'bank_address_address' => 'Houston',
+            'bank_reference' => 'JUUTrRvXEKKBDXWQTIMO664NYVE33B',
+            'account_name' => 'Crestwood Capital Management ',
             'account_number' => '0123456789',
-            'account_name' => 'SandBox'
+            'bank_name' => 'Swiss Bank Finland',
+            'swift_code' => '0065587',
+
+            'crypto_note' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam facere et quaerat optio reprehenderit soluta deleniti magni sapiente, ipsam atque ea cum veritatis aut enim ipsum impedit explicabo ipsa. Tempora.',
+            'bank_note_initial' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam facere et quaerat optio reprehenderit soluta deleniti magni sapiente, ipsam atque ea cum veritatis aut enim ipsum impedit explicabo ipsa. Tempora.',
+            'bank_note_final' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam facere et quaerat optio reprehenderit soluta deleniti magni sapiente, ipsam atque ea cum veritatis aut enim ipsum impedit explicabo ipsa. Tempora.',
         ]);
     }
 

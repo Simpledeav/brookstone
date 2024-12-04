@@ -13,10 +13,49 @@
     </nav>
 @endsection
 
+@php 
+
+$networks = \App\Models\AccountNetwork::all();
+
+@endphp
+
 @section('content')
     <div class="row">
         <div class="col-md-6 grid-margin">
             <div class="card">
+            @extends('layouts.admin')
+
+            <div class="card-body">
+                    <div class="my-3">
+                        <form action="{{ route('admin.addresses.store') }}" method="POST">
+                            @csrf
+                            <h6 class="card-title">Crypto Network</h6>
+                            <div class="mb-3">
+                                <label for="network" class="form-label">Select Network</label>
+                                <select name="account_network_id" id="network" class="form-control">
+                                    <option value="">Select a Network</option>
+                                    @foreach($networks as $network)
+                                        <option value="{{ $network->id }}">{{ $network->name }} ({{ $network->symbol }})</option>
+                                    @endforeach
+                                </select>
+                                @error('account_network_id')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Wallet Address</label>
+                                <input type="text" name="address" id="address" class="form-control" placeholder="No address set" value="{{ old('address') }}">
+                                @error('address')
+                                    <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Add Address</button>
+                        </form>
+                    </div>
+                </div>
+
                 <div class="card-body">
                     <h6 class="card-title">Bank Details</h6>
                     <form action="{{ route('admin.bank.update') }}" id="bankDetailsForm" method="POST">
@@ -97,6 +136,71 @@
             </div>
         </div>
         <div class="col-md-6 grid-margin">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="card-title">Crytocurrency/Bank Information</h6>
+                    <div class="">
+                        <form action="{{ route('admin.settings.bank') }}" method="POST">
+                            @csrf
+                            <div class="my-4">
+                                <label for="crypto_note">Cryptocurrency Note:</label>
+                                <textarea name="crypto_note" id="crypto_note" class="form-control" cols="30" rows="10">{{ $setting->crypto_note }}</textarea>
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_note_initial">Bank Note (Initial):</label>
+                                <textarea name="bank_note_initial" id="bank_note_initial" class="form-control" cols="30" rows="10">{{ $setting->bank_note_initial }}</textarea>
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_note_final">Bank Note (Final):</label>
+                                <textarea name="bank_note_final" id="bank_note_final" class="form-control" cols="30" rows="10">{{ $setting->bank_note_final }}</textarea>
+                            </div>
+                            <div class="my-4">
+                                <label for="account_name">Account Name:</label>
+                                <input type="text" class="form-control" name="account_name" value="{{ $setting->account_name }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="account_number">Account Number:</label>
+                                <input type="text" class="form-control" name="account_number" value="{{ $setting->account_number }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="swift_code">Swift Code:</label>
+                                <input type="text" class="form-control" name="swift_code" value="{{ $setting->swift_code }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_name">Bank Name:</label>
+                                <input type="text" class="form-control" name="bank_name" value="{{ $setting->bank_name }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_address">Bank Address:</label>
+                                <input type="text" class="form-control" name="bank_address" value="{{ $setting->bank_address }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_phone">Bank Phone:</label>
+                                <input type="text" class="form-control" name="bank_phone" value="{{ $setting->bank_phone }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_country">Bank Country:</label>
+                                <input type="text" class="form-control" name="bank_country" value="{{ $setting->bank_country }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_state">Bank State:</label>
+                                <input type="text" class="form-control" name="bank_state" value="{{ $setting->bank_state }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_address_address">Address:</label>
+                                <input type="text" class="form-control" name="bank_address_address" value="{{ $setting->bank_address_address }}">
+                            </div>
+                            <div class="my-4">
+                                <label for="bank_reference">Bank Reference:</label>
+                                <input type="text" class="form-control" name="bank_reference" value="{{ $setting->bank_reference }}">
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-primary" type="submit">Update Settings</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <div class="card">
                 <div class="card-body">
                     <h6 class="card-title">Other Settings</h6>
@@ -421,6 +525,39 @@
                     verifyingDisplay.addClass('d-none');
                 }
             }
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Trigger change event when network is selected
+            $('#network').on('change', function () {
+                var networkId = $(this).val(); // Get selected network id
+
+                if (networkId) {
+                    // Make an API request or use an AJAX call to get the address for the selected network
+                    $.ajax({
+                        url: '/api/deposit/address/' + networkId, // The API route to fetch address based on network
+                        type: 'GET',
+                        success: function (response) {
+                            if (response.data && response.data.address) {
+                                $('#address').val(response.data.address); 
+                            } else {
+                                $('#address').val(''); 
+                                $('#address').attr('placeholder', 'No address set'); 
+                            }
+                        },
+                        error: function () {
+                            $('#address').val(''); // Handle errors by clearing the field
+                            $('#address').attr('placeholder', 'No address set');
+                        }
+                    });
+                } else {
+                    // Reset if no network is selected
+                    $('#address').val('');
+                    $('#address').attr('placeholder', 'No address set');
+                }
+            });
         });
     </script>
 @endsection

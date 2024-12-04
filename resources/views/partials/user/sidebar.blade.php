@@ -47,8 +47,8 @@
                     <span class="link-title">Packages</span>
                 </a>
             </li>
-            <li class="nav-item @if(request()->is('invest')) active @endif">
-                <a href="{{ route('invest') }}" class="nav-link">
+            <li class="nav-item @if(request()->is('investment')) active @endif">
+                <a href="{{ route('investment') }}" class="nav-link">
                     <i class="link-icon" data-feather="tag"></i>
                     <span class="link-title">New Investment</span>
                 </a>
