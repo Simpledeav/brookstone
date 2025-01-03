@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Stock;
+use App\Models\Crypto;
 use App\Models\Setting;
 use App\Models\Trading;
 use App\Models\Watchlist;
@@ -11,10 +13,10 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
+
+
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
-
-
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Validator;
@@ -30,8 +32,11 @@ class HomeController extends Controller
         $investment = $user->wallet->invest;
         $trading = $user->wallet->trade;
         $locked = $user->wallet->locked;
+        $wallet = $user->wallet->balance;
 
-        $transactions = $user->transaction()->paginate(10); 
+        $availableCash = ($wallet + ($savings + $investment + $trading));
+
+        $transactions = $user->transaction()->orderBy('created_at', 'desc')->paginate(10); 
 
         $totalAmount = 0;
 
@@ -76,7 +81,9 @@ class HomeController extends Controller
 
         $trd = $user->trades('stocks')->sum('amount') + $user->trades('crypto')->sum('amount');
 
-        $lockedFunds = ($inv + $sav + $trd);
+        $lockedFunds = ($inv + $sav + $trd);    
+
+        $slidesData = $this->getTopAssets();
 
         return view('user_.dashboard.index', [
             'title' => 'Dashboard', 
@@ -97,7 +104,49 @@ class HomeController extends Controller
             'tradingPercentage' => $tradingPercentage,
 
             'lockedFunds' => $lockedFunds,
+            'slidesData' => $slidesData,
+
+            'portfolio' => $availableCash,
         ]);
+    }
+
+    private function getTopAssets()
+    {
+        // Fetch top 5 Cryptos
+        $cryptos = Crypto::orderBy('market_cap', 'desc')
+            ->take(5)
+            ->get();
+
+        // Fetch top 5 Stocks
+        $stocks = Stock::orderBy('market_cap', 'desc')
+            ->take(5)
+            ->get();
+
+        // Merge the cryptos and stocks into one collection
+        $assets = $cryptos->merge($stocks);
+
+        // Define the color classes
+        $colors = ['success', 'primary', 'secondary', 'info', 'warning', 'danger', 'dark'];
+
+        // Iterate over assets and assign random colors and img
+        $assets = $assets->map(function ($asset) use ($colors) {
+            // Shuffle the color array to get a random color each time
+            $shuffledColors = $colors;
+            shuffle($shuffledColors); // Shuffle the array
+
+            return [
+                'name' => $asset->name,
+                'icon' => $asset->img,  // Use asset's img as the icon
+                'colorClass' => $shuffledColors[0], // Randomly assigned color
+                'price' => "$" . number_format($asset->price, 2), // Formatting price
+                'percentageChange' => number_format($asset->changes_percentage, 2) . "%",
+                'changeDirection' => "ti-arrow-bear-right", // You can replace with actual direction logic
+                'changeAmount' => "$" . number_format($asset->change, 2),
+            ];
+        });
+
+        // Shuffle the assets array to mix stocks and cryptos randomly
+        return $assets->shuffle(); // Return the shuffled assets directly as an array
     }
 
     public function kyc()
@@ -576,6 +625,13 @@ class HomeController extends Controller
                 'state' => ['sometimes'],
                 'postal_code' => ['sometimes'],
                 'address' => ['sometimes'],
+                'nk_name' => ['sometimes'],
+                'nk_phone' => ['sometimes'],
+                'nk_relationship' => ['sometimes'],
+                'nk_country' => ['sometimes'],
+                'nk_state' => ['sometimes'],
+                'nk_address' => ['sometimes'],
+                'nk_postal' => ['sometimes'],
             ]);
 
             if ($validator->fails()) {
@@ -598,6 +654,13 @@ class HomeController extends Controller
                 'state' => $request->state,
                 'postal_code' => $request->postal_code,
                 'address' => $request->address,
+                'nk_name' => $request->nk_name,
+                'nk_phone' => $request->nk_phone,
+                'nk_relation' => $request->nk_relationship,
+                'nk_country' => $request->nk_country,
+                'nk_state' => $request->nk_state,
+                'nk_address' => $request->nk_address,
+                'nk_postal' => $request->nk_postal,
             ]);
 
             // Update profile
@@ -610,6 +673,7 @@ class HomeController extends Controller
 
         if ($request->screen == 'six')
         {
+            dd($request->all());
             $validator = Validator::make($request->all(), [
                 'nk_name' => ['sometimes'],
                 'nk_phone' => ['sometimes'],
@@ -652,26 +716,6 @@ class HomeController extends Controller
 
         if ($request->screen == 'seven')
         {
-            // $validator = Validator::make($request->all(), [
-            //     'nk_name' => ['sometimes'],
-            //     'nk_phone' => ['sometimes'],
-            //     'nk_relationship' => ['sometimes'],
-            //     'nk_country' => ['sometimes'],
-            //     'nk_state' => ['sometimes'],
-            //     'nk_address' => ['sometimes'],
-            //     'nk_postal' => ['sometimes'],
-            // ]);
-
-            // if ($validator->fails()) {
-            //     // Retrieve all error messages
-            //     $errors = $validator->errors()->all();
-            
-            //     // Convert errors to a readable string
-            //     $errorMessage = implode(', ', $errors);
-            
-            //     return back()->withInput()->withErrors($validator)->with('error', 'Invalid input data: ' . $errorMessage);
-            // }
-
             $user =auth()->user();
             $data = null;
 
@@ -740,6 +784,49 @@ class HomeController extends Controller
             // return back()->withInput()->with('error', 'Error updating profile');
 
         }
+
+        if ($request->screen == 'proof') {
+            // Validate file
+            $request->validate([
+                'proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:3072', // Validate file type and size
+            ]);
+    
+            $user = auth()->user();
+            $data = null;
+    
+            if ($request->hasFile('proof')) {
+                // If there's an existing proof file, delete it
+                if ($oldProof = $user->proof) {
+                    try {
+                        unlink(public_path($oldProof)); // Delete old file
+                    } catch (\Exception $e) {
+                        // Handle file deletion error
+                    }
+                }
+    
+                // Handle the new file upload
+                $file = $request->file('proof');
+                $destinationPath = 'assets/proof'; // Define the upload path
+                static::createDirectoryIfNotExists($destinationPath);
+    
+                $fileName = $user->id . '-' . time() . '.' . $file->getClientOriginalExtension(); // Generate a unique file name
+                $file->move(public_path($destinationPath), $fileName); // Move file to destination
+    
+                $data = $destinationPath . '/' . $fileName; // Store the file path
+            }
+    
+            // Update user proof field
+            $update = $user->update([
+                'proof' => $data,
+            ]);
+    
+            if ($update) {
+                return back()->with('success', 'Proof uploaded successfully');
+            }
+    
+            return back()->withInput()->with('error', 'Error updating profile');
+        }
+        
     }
 
     public function storeKYC(Request $request)

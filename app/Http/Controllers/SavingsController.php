@@ -314,7 +314,7 @@ class SavingsController extends Controller
     }
     public function packages()
     {
-        return view('user.savings.packages.index', ['title' => 'Packages', 'packages' => SavingPackage::all()]);
+        return view('user.savings.packages.index', ['title' => 'Packages', 'packages' => Plan::all()]);
     }
 
     public function create()
@@ -469,7 +469,7 @@ class SavingsController extends Controller
     {
         try {
             // Retrieve all plans from the database
-            $plans = Plan::all();
+            $plans = Plan::whereBetween('id', [1, 6])->get();
 
             // Return response as JSON
             return response()->json([

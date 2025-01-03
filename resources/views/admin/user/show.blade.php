@@ -117,6 +117,29 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center justify-content-between mt-5 mb-2">
+                                <h6 class="card-title mb-0">Crypto Wallet</h6>
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <div class="mt-2">
+                                        <label class="tx-11 font-weight-bold mb-0 text-uppercase">Cryptocurrency:</label>
+                                        <div id="coin-select"></div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="mt-2">
+                                        <label class="tx-11 font-weight-bold mb-0 text-uppercase">Network:</label>
+                                        <div id="network-select"></div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mt-2">
+                                        <label class="tx-11 font-weight-bold mb-0 text-uppercase">Wallet Address:</label>
+                                        <p class="fw-bold">{{ $user['wallet_address'] ?? 'Not set' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center justify-content-between mt-5 mb-2">
                                 <h6 class="card-title mb-0">Next of Kin Details</h6>
                             </div>
                             <div class="row">
@@ -160,6 +183,36 @@
                                     <p class="text-muted">Not Set</p>
                                 </div>
                             @endif
+                            <div class="d-flex align-items-center justify-content-between mt-5 mb-2">
+                                <h6 class="card-title mb-0">Proof of Address</h6>
+                                <span class="badge @if($user['is_approved'] == 'pending') bg-warning @elseif($user['is_approved'] == 'decline') bg-danger @else bg-success @endif text-light">
+                                    @if($user['is_approved'] == 'pending') Pending @elseif($user['is_approved'] == 'decline') Declined @else Approved @endif
+                                </span>
+                            </div>
+                            @if($user['proof'])
+                                <div class="mt-2">
+                                    <img class="img-fluid" style="border-radius: 5px" src="{{ asset($user['proof']) }}" alt="proof">
+                                </div>
+                                <div class="mt-2 text-right">
+                                    <form id="actionForm" action="{{ route('admin.user.proof', $user['id']) }}" method="POST">
+                                        @csrf
+                                        <input type="hidden" name="action" id="actionField" value="">
+                                        <button type="button" onclick="submitAction('approved')" class="btn btn-sm btn-success">Approve</button>
+                                        <button type="button" onclick="submitAction('decline')" class="btn btn-sm btn-danger">Decline</button>
+                                        <button onclick="confirmFormSubmit('downloadFileForm')" class="btn btn-sm btn-primary"><i class="icon-sm" data-feather="download"></i></button>
+                                    </form>
+                                    <form id="downloadFileForm" action="{{ route('admin.download') }}" method="POST">
+                                        @csrf
+                                        <label>
+                                            <input type="hidden" name="path" value="{{ $user['proof'] }}">
+                                        </label>
+                                    </form>
+                                </div>
+                            @else
+                                <div class="mt-2">
+                                    <p class="text-muted">Not Set</p>
+                                </div>
+                            @endif
                             @can('Delete Users')
                                 <div class="mt-4">
                                     <button data-toggle="modal" data-target="#deleteUserModal" class="btn my-2 mx-1 btn-danger">
@@ -182,10 +235,10 @@
                                 <div class="col-md-6 my-2">
                                     <div class="card">
                                         <div class="card-body text-center">
-                                            <h5 class="card-title text-center">Naira Wallet</h5>
+                                            <h5 class="card-title text-center">Wallet Account</h5>
                                             <div class="my-2">
                                                 <p class="mt-3 small">Total Balance</p>
-                                                <h3 class="font-weight-light">${{ number_format($user->walletBalance(), 2) }}</h3>
+                                                <h3 class="font-weight-light">${{ number_format($user->wallet->balance, 2) }}</h3>
                                             </div>
                                             <div class="mt-3 bg-light py-3 mb-2 d-flex justify-content-around" style="border-radius: 5px">
                                                 @can('Deposit For Users')
@@ -204,151 +257,10 @@
                                         </div>
                                     </div>
                                 </div>
-{{--                                <div class="col-md-6 my-2">--}}
-{{--                                    <div class="card">--}}
-{{--                                        <div class="card-body text-center">--}}
-{{--                                            <h5 class="card-title text-center">Gold Wallet</h5>--}}
-{{--                                            <div class="my-2">--}}
-{{--                                                <p class="mt-3 small">Total Balance</p>--}}
-{{--                                                <h3 class="font-weight-light">{{ round($user->goldWallet['balance'], 6) }} grams</h3>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="mt-3 bg-light py-3 mb-2 d-flex justify-content-around" style="border-radius: 5px">--}}
-{{--                                                @can('Buy Products For Users')--}}
-{{--                                                <a href="{{ route('admin.users.trades.buy', $user['id']) }}" class="btn my-2 px-4 mx-1 btn-success">--}}
-{{--                                                    <i class="fa fa-chart-line"></i>--}}
-{{--                                                    <span class="mt-1 d-block small">Buy</span>--}}
-{{--                                                </a>--}}
-{{--                                                @endcan--}}
-{{--                                                @can('Sell Products For Users')--}}
-{{--                                                <a href="{{ route('admin.users.trades.sell', $user['id']) }}" class="btn my-2 px-4 mx-1 btn-danger">--}}
-{{--                                                    <i class="fa fa-chart-line"></i>--}}
-{{--                                                    <span class="mt-1 d-block small">Sell</span>--}}
-{{--                                                </a>--}}
-{{--                                                @endcan--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="col-md-6 my-2">--}}
-{{--                                    <div class="card">--}}
-{{--                                        <div class="card-body text-center">--}}
-{{--                                            <h5 class="card-title text-center">Silver Wallet</h5>--}}
-{{--                                            <div class="my-2">--}}
-{{--                                                <p class="mt-3 small">Total Balance</p>--}}
-{{--                                                <h3 class="font-weight-light">{{ round($user->silverWallet['balance'], 6) }} grams</h3>--}}
-{{--                                            </div>--}}
-{{--                                            <div class="mt-3 bg-light py-3 mb-2 d-flex justify-content-around" style="border-radius: 5px">--}}
-{{--                                                @can('Buy Products For Users')--}}
-{{--                                                <a href="{{ route('admin.users.trades.buy', $user['id']) }}" class="btn my-2 px-4 mx-1 btn-success">--}}
-{{--                                                    <i class="fa fa-chart-line"></i>--}}
-{{--                                                    <span class="mt-1 d-block small">Buy</span>--}}
-{{--                                                </a>--}}
-{{--                                                @endcan--}}
-{{--                                                @can('Sell Products For Users')--}}
-{{--                                                <a href="{{ route('admin.users.trades.sell', $user['id']) }}" class="btn my-2 px-4 mx-1 btn-danger">--}}
-{{--                                                    <i class="fa fa-chart-line"></i>--}}
-{{--                                                    <span class="mt-1 d-block small">Sell</span>--}}
-{{--                                                </a>--}}
-{{--                                                @endcan--}}
-{{--                                            </div>--}}
-{{--                                        </div>--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
                             </div>
                         </div>
                     </div>
                 </div>
-{{--                <div id="trades" class="col-12 mb-5">--}}
-{{--                    <div class="card rounded">--}}
-{{--                        <div class="card-body">--}}
-{{--                            <div class="mb-5">--}}
-{{--                                <div class="d-flex mb-3 align-items-center justify-content-between">--}}
-{{--                                    <h6 class="card-title my-auto">Trades</h6>--}}
-{{--                                    <div>--}}
-{{--                                        @can('Buy Gold For Users')--}}
-{{--                                        <a href="{{ route('admin.users.trades.buy', $user['id']) }}" class="btn mx-2 btn-sm btn-success">Buy</a>--}}
-{{--                                        @endcan--}}
-{{--                                        @can('Sell Gold For Users')--}}
-{{--                                        <a href="{{ route('admin.users.trades.sell', $user['id']) }}" class="btn btn-sm btn-danger">Sell</a>--}}
-{{--                                        @endcan--}}
-{{--                                    </div>--}}
-{{--                                </div>--}}
-{{--                                <div class="table-responsive">--}}
-{{--                                    <table id="dataTableExample" class="table">--}}
-{{--                                        <thead>--}}
-{{--                                        <tr>--}}
-{{--                                            <th><i class="fas fa-list-ul"></i></th>--}}
-{{--                                            <th>Grams</th>--}}
-{{--                                            <th>Amount</th>--}}
-{{--                                            <th>Product</th>--}}
-{{--                                            <th>Type</th>--}}
-{{--                                            <th>Date</th>--}}
-{{--                                            <th>Status</th>--}}
-{{--                                            <th>Action</th>--}}
-{{--                                        </tr>--}}
-{{--                                        </thead>--}}
-{{--                                        <tbody>--}}
-{{--                                        @foreach($user->trades()->latest()->get() as $key=>$trade)--}}
-{{--                                            <tr>--}}
-{{--                                                <td>{{ $key + 1 }}</td>--}}
-{{--                                                <td>{{ $trade['grams'] }} Grams</td>--}}
-{{--                                                <td>₦ {{ number_format($trade['amount']) }}</td>--}}
-{{--                                                <td>--}}
-{{--                                                    @if($trade['product'] == 'gold')--}}
-{{--                                                        <span class="badge badge-gold">Gold</span>--}}
-{{--                                                    @else--}}
-{{--                                                        <span class="badge badge-silver">Silver</span>--}}
-{{--                                                    @endif--}}
-{{--                                                </td>--}}
-{{--                                                <td>--}}
-{{--                                                    @if($trade['type'] == 'buy')--}}
-{{--                                                        <span class="badge badge-success">Buy</span>--}}
-{{--                                                    @else--}}
-{{--                                                        <span class="badge badge-danger">Sell</span>--}}
-{{--                                                    @endif--}}
-{{--                                                </td>--}}
-{{--                                                <td>{{ $trade['created_at']->format('M d, Y') }}</td>--}}
-{{--                                                <td>--}}
-{{--                                                    @if($trade['status'] == 'success')--}}
-{{--                                                        <span class="badge badge-pill badge-success">Success</span>--}}
-{{--                                                    @elseif($trade['status'] == 'pending')--}}
-{{--                                                        <span class="badge badge-pill badge-warning">Pending</span>--}}
-{{--                                                    @elseif($trade['status'] == 'failed')--}}
-{{--                                                        <span class="badge badge-pill badge-danger">Failed</span>--}}
-{{--                                                    @endif--}}
-{{--                                                </td>--}}
-{{--                                                <td>--}}
-{{--                                                    <div class="dropdown">--}}
-{{--                                                        <button @if($trade['status'] != 'pending') disabled @endif class="btn btn-sm btn-primary" type="button" id="dropdownMenuButton3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">--}}
-{{--                                                            Action <i class="icon-lg" data-feather="chevron-down"></i>--}}
-{{--                                                        </button>--}}
-{{--                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton3">--}}
-{{--                                                            @if($trade['transaction']['status'] == 'pending')--}}
-{{--                                                                <a class="dropdown-item d-flex align-items-center" onclick="event.preventDefault(); confirmFormSubmit('transactionApprove{{ $trade['id'] }}')" href="{{ route('admin.transactions.approve', $trade['transaction']['id']) }}"><i data-feather="check" class="icon-sm mr-2"></i> <span class="">Approve</span></a>--}}
-{{--                                                                <a class="dropdown-item d-flex align-items-center" onclick="event.preventDefault(); confirmFormSubmit('transactionDecline{{ $trade['id'] }}')" href="{{ route('admin.transactions.decline', $trade['transaction']['id']) }}"><i data-feather="x" class="icon-sm mr-2"></i> <span class="">Decline</span></a>--}}
-{{--                                                            @endif--}}
-{{--                                                        </div>--}}
-{{--                                                        @if($trade['transaction']['status'] == 'pending')--}}
-{{--                                                            <form id="transactionApprove{{ $trade['id'] }}" action="{{ route('admin.transactions.approve', $trade['transaction']['id']) }}" method="POST">--}}
-{{--                                                                @csrf--}}
-{{--                                                                @method('PUT')--}}
-{{--                                                            </form>--}}
-{{--                                                            <form id="transactionDecline{{ $trade['id'] }}" action="{{ route('admin.transactions.decline', $trade['transaction']['id']) }}" method="POST">--}}
-{{--                                                                @csrf--}}
-{{--                                                                @method('PUT')--}}
-{{--                                                            </form>--}}
-{{--                                                        @endif--}}
-{{--                                                    </div>--}}
-{{--                                                </td>--}}
-{{--                                            </tr>--}}
-{{--                                        @endforeach--}}
-{{--                                        </tbody>--}}
-{{--                                    </table>--}}
-{{--                                </div>--}}
-{{--                            </div>--}}
-{{--                        </div>--}}
-{{--                    </div>--}}
-{{--                </div>--}}
 
                 <div id="investments" class="col-12 mb-5">
                     <div class="card rounded">
@@ -448,18 +360,39 @@
                                     <table id="dataTableExample1" class="table">
                                         <thead>
                                         <tr>
-                                            <th><i class="fas fa-list-ul"></i></th>
-                                            <th>Package</th>
-                                            <th>Duration</th>
-                                            <th>Amount Saved</th>
-                                            <th>Amount Remaining</th>
-                                            <th>Days Left</th>
+                                            <th>S/N</th>
+                                            <th>Plan</th>
+                                            <th>Date</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                         </thead>
                                         <tbody>
-                                        @foreach($user->savings()->latest()->get() as $key=>$saving)
+
+                                        @php 
+                                            $save = $user->savings;
+                                        @endphp
+                                            
+                                        @foreach($save as $key=>$saving)
+                                            <tr>
+                                                <td>{{ $key + 1 }}</td>
+                                                <td>{{ $saving->plan->name }}</td>
+                                                <td>{{ $saving['created_at']->format('M d, Y \a\t h:i A') }}</td>
+                                                <td>
+                                                    @if($saving['status'] == 'active')
+                                                        <span class="badge bg-success-transparent"><i class="ri-check-fill align-middle me-1"></i>Active</span>
+                                                    @elseif($saving['status'] == 'pending')
+                                                        <span class="badge bg-warning-transparent"><i class="ri-info-fill align-middle me-1"></i>Pending</span>
+                                                    @elseif($saving['status'] == 'cancelled')
+                                                        <span class="badge bg-danger-transparent"><i class="ri-close-fill align-middle me-1"></i>Cancelled</span>
+                                                    @elseif($saving['status'] == 'settled')
+                                                        <span class="badge bg-light text-dark"><i class="ri-reply-line align-middle me-1"></i>Settled</span>
+                                                    @endif
+                                                </td>
+                                                <td></td>
+                                            </tr>
+                                        @endforeach
+                                        {{-- @foreach($user->savings()->latest()->get() as $key=>$saving)
                                             @php 
                                                 $paid = $saving->transaction()->where('status', 'approved')->count();
                                             @endphp
@@ -499,7 +432,7 @@
                                                     </div>
                                                 </td>
                                             </tr>
-                                        @endforeach
+                                        @endforeach --}}
                                         </tbody>
                                     </table>
                                 </div>
@@ -559,6 +492,84 @@
                 document.getElementById('deleteUserButton').disabled = false;
             } else {
                 document.getElementById('deleteUserButton').disabled = true;
+            }
+        });
+
+
+        function submitAction(action) {
+            document.getElementById('actionField').value = action;
+            document.getElementById('actionForm').submit();
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            // Fetch coins on page load
+            fetchCoins();
+
+            // Variables to hold selected coin rate and symbol
+            let selectedCoinRate = 0;
+            let selectedCoinSymbol = '';
+            let coins = []; // Store coins data for reference
+
+            // Default values from server-side data
+            const defaultCoinId = "{{ $user['wallet_asset'] }}";
+            const defaultNetworkId = "{{ $user['wallet_network'] }}";
+
+            fetchNetworks(defaultCoinId)
+
+            const coinImages = {
+                ETH: 'https://cryptologos.cc/logos/ethereum-eth-logo.png',
+                BTC: 'https://cryptologos.cc/logos/bitcoin-btc-logo.png',
+                TRX: 'https://cdn-icons-png.flaticon.com/512/12114/12114250.png',
+                USDT: 'https://icons.iconarchive.com/icons/cjdowner/cryptocurrency-flat/512/Tether-USDT-icon.png'
+            };
+
+            // Function to fetch coins and set default selection
+            function fetchCoins() {
+                $.ajax({
+                    url: '/api/deposit/coin',
+                    type: 'GET',
+                    success: function (response) {
+                        coins = response.data;
+                        let options = '<p value="fw-bold">Not set</p>';
+                        response.data.forEach(function (coin) {
+                            if(defaultCoinId == coin.id)
+                                options = `<p class="fw-bold">${coin.name} (${coin.symbol})</p>`;
+                        });
+                        $('#coin-select').html(options);
+                    }
+                });
+            }
+
+            // Function to fetch networks and set default selection
+            function fetchNetworks(coinId) {
+                $.ajax({
+                    url: `/api/deposit/networks/${coinId}`,
+                    type: 'GET',
+                    success: function (response) {
+                        let options = '<option value="">Select Network</option>';
+                        response.data.forEach(function (network) {
+                            if(defaultNetworkId == network.id)
+                                options = `<p class="fw-bold">${network.name}</p>`;
+                        });
+                        $('#network-select').html(options);
+                    }
+                });
+            }
+
+            // Function to fetch address
+            function fetchAddress(networkId) {
+                $.ajax({
+                    url: `/api/deposit/address/${networkId}`,
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.data && response.data.address) {
+                            $('#address-display').val(response.data.address).prop('disabled', true);
+                        } else {
+                            $('#address-display').val('Address not available').prop('disabled', true);
+                        }
+                    }
+                });
             }
         });
     </script>

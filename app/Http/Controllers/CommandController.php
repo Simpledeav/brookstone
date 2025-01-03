@@ -368,7 +368,7 @@ class CommandController extends Controller
 
         foreach ($stockSymbols as $chunk) {
             $symbolString = implode(',', $chunk->toArray());
-            $apiUrl = "https://financialmodelingprep.com/api/v3/quote/{$symbolString}?apikey=ExYlr0LoPC6GqCmzuScjwq79Fn4Krx77";
+            $apiUrl = "https://financialmodelingprep.com/api/v3/quote/{$symbolString}?apikey=U16Gq0PRKGgnTbltSa5423seAWtQNV0T";
 
             $response = Http::get($apiUrl);
 
@@ -412,7 +412,7 @@ class CommandController extends Controller
 
         foreach ($stockSymbols as $chunk) {
             $symbolString = implode(',', $chunk->toArray());
-            $apiUrl = "https://financialmodelingprep.com/api/v3/quote/{$symbolString}?apikey=ExYlr0LoPC6GqCmzuScjwq79Fn4Krx77";
+            $apiUrl = "https://financialmodelingprep.com/api/v3/quote/{$symbolString}?apikey=U16Gq0PRKGgnTbltSa5423seAWtQNV0T";
 
             $response = Http::get($apiUrl);
 
@@ -446,7 +446,47 @@ class CommandController extends Controller
                 $command->error("Failed to fetch stock data for chunk: " . $symbolString);
             }
         }
-        $command->info("Stock updates completed.");
+
+        // Update `account_coins` table for specific cryptos
+        $command->info("Updating specific cryptocurrencies in account_coins...");
+
+        // Define the mapping between database symbols and API symbols
+        $cryptoMapping = [
+            'BTC' => 'BTCUSD',
+            'ETH' => 'ETHUSD',
+            'USDT' => 'USDTUSD',
+            'TRX' => 'TRXUSD',
+        ];
+
+        // Prepare the API query string
+        $cryptoSymbols = array_values($cryptoMapping);
+        $cryptoString = implode(',', $cryptoSymbols);
+        $apiUrl = "https://financialmodelingprep.com/api/v3/quote/{$cryptoString}?apikey=U16Gq0PRKGgnTbltSa5423seAWtQNV0T";
+
+        $response = Http::get($apiUrl);
+
+        if ($response->successful()) {
+            $responseData = collect($response->json())->keyBy('symbol'); // Organize data by symbol
+
+            foreach ($cryptoMapping as $dbSymbol => $apiSymbol) {
+                if (isset($responseData[$apiSymbol])) {
+                    $data = $responseData[$apiSymbol];
+                    DB::table('account_coins')->where('symbol', $dbSymbol)->update([
+                        'rate' => $data['price'] ?? 0,
+                        'updated_at' => now(),
+                    ]);
+                    $command->info("Updated coin: {$dbSymbol} with rate from {$apiSymbol}");
+                } else {
+                    $command->error("Data for {$apiSymbol} not found in API response.");
+                }
+            }
+        } else {
+            Log::error("Failed to fetch crypto data for account_coins. Status: " . $response->status());
+            $command->error("Failed to fetch crypto data for account_coins.");
+        }
+
+        $command->info("Crypto updates completed.");
+
     }
 
     public static function distributeProfit($command)

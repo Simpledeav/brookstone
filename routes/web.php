@@ -54,6 +54,11 @@ Route::get('/terms', [FrontendController::class, 'terms'])->name('terms');
 
 Auth::routes(['verify' => true]);
 
+Route::post('/logout/verification', function () {
+    Auth::logout();
+    return redirect('/register');
+})->name('logout.verification');
+
 Route::get('/auth/{provider}/attempt', [App\Http\Controllers\Auth\SocialController::class, 'redirect'])->name('auth.social.attempt');
 Route::get('/login/{provider}/callback', [App\Http\Controllers\Auth\SocialController::class, 'socialLoginAttempt'])->name('auth.social.login.attempt');
 Route::get('/market/{product}/chart', [App\Http\Controllers\HomeController::class, 'showMarket'])->name('market.show');
@@ -186,3 +191,4 @@ Route::group(['middleware' => ['auth','verified', 'active_user', 'profile_comple
         Route::post('/watchlist', [App\Http\Controllers\HomeController::class, 'storeWatchlist'])->name('add.watchlist');
     // });
 });
+

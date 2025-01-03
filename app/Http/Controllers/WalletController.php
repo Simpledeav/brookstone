@@ -91,7 +91,9 @@ class WalletController extends Controller
     {
         $setting = Setting::all()->first();
 
-        return view('user_.wallet.deposit', ['setting' => $setting]);
+        $user = auth()->user();
+
+        return view('user_.wallet.deposit', ['setting' => $setting, 'user' => $user]);
     }
 
     public function deposit(Request $request)
@@ -200,7 +202,7 @@ class WalletController extends Controller
         if ($transaction) {
             NotificationController::sendDepositQueuedNotification($transaction);
             // return redirect()->route('wallet')->with('success', 'Deposit queued successfully');
-            return redirect()->route('wallet')->with('success', 'Deposit queued successfully');
+            return redirect()->route('transactions.history')->with('success', 'Deposit queued successfully');
         }
         return redirect()->route('wallet')->with('error', 'Error processing deposit');
     }

@@ -1,12 +1,17 @@
 @extends('layouts.user.index')
 
+@section('title', ' Dashboard')
+
+@section('styles')
+
 <link rel="stylesheet" href="{{ asset('asset/libs/swiper/swiper-bundle.min.css') }}">
+
+@endsection
 
 @section('content')
 <!-- Start::app-content -->
 <div class="main-content app-content">
     <div class="container-fluid">
-
         <!-- Start::page-header -->
         <div
             class="my-4 page-header-breadcrumb d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -23,7 +28,7 @@
             </div>
             <div class="d-flex gap-4">
                 <a href="{{ route('wallet') }}" class="btn btn-primary-light btn-wave waves-effect waves-light">
-                    <i class="fe fe-dollar-sign me-2"></i> Wallet
+                    <i class="fe fe-dollar-sign me-2"></i> Cash
                 </a>
             </div>
         </div>
@@ -53,11 +58,14 @@
                                         </div>
                                     </div>
                                     <div class="mt-3">
-                                        <h4 class="fw-semibold mb-1">&#36;{{ number_format($savings, 2) }}</h4>
-                                        <span class="text-muted fs-12">Savings Balance
-                                            <!-- <span class="text-success ms-2 d-inline-block">0.45% <i class="ti ti-arrow-narrow-up"></i></span> -->
+                                        <h4 class="fw-semibold mb-1">&#36;{{ number_format($savings, 2) }} 
+                                            <span class="text-success ms-2 d-inline-block fs-12">{{ number_format($savingsPercentage, 2) }}% <i class="ti ti-arrow-narrow-up"></i></span>
+                                        </h4>
+                                        <span class="text-muted fs-12">Savings Account
+                                            <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-dark" title="Total value of funds across all savings accounts." class="text-muted mx-1">
+                                                <i class="fe fe-info"></i>
+                                            </a>
                                         </span>
-
                                     </div>
                                 </div>
                             </div>
@@ -79,11 +87,14 @@
                                         </div>
                                     </div>
                                     <div class="mt-3">
-                                        <h4 class="fw-semibold mb-1">&#36;{{ number_format($investment, 2) }}</h4>
-                                        <span class="text-muted fs-12">Investment Balance 
-                                            <!-- <span class="text-danger ms-2 d-inline-block">-1.32%<i class="ti ti-arrow-narrow-down"></i></span> -->
+                                        <h4 class="fw-semibold mb-1">&#36;{{ number_format($investment, 2) }} 
+                                            <span class="text-success ms-2 d-inline-block fs-12">{{ number_format($investmentPercentage, 2) }}% <i class="ti ti-arrow-narrow-up"></i></span>
+                                        </h4>
+                                        <span class="text-muted fs-12">Managed Investment
+                                            <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-dark" title="Total value of investments across all packages." class="text-muted mx-1">
+                                                <i class="fe fe-info"></i>
+                                            </a>
                                         </span>
-
                                     </div>
                                 </div>
                             </div>
@@ -107,11 +118,14 @@
                                         </div>
                                     </div>
                                     <div class="mt-3">
-                                        <h4 class="fw-semibold mb-1">&#36;{{ number_format($trading, 2) }}</h4>
-                                        <span class="text-muted fs-12">Tradning Balance
-                                            <!-- <span class="text-success ms-2 d-inline-block">0.45%<i class="ti ti-arrow-narrow-up"></i></span> -->
+                                        <h4 class="fw-semibold mb-1">&#36;{{ number_format($trading, 2) }} 
+                                            <span class="text-success ms-2 d-inline-block fs-12">{{ number_format($tradingPercentage, 2) }}% <i class="ti ti-arrow-narrow-up"></i></span>
+                                        </h4>
+                                        <span class="text-muted fs-12">Available Trading Balance
+                                            <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-dark" title="Funds available for placing new trades." class="text-muted mx-1">
+                                                <i class="fe fe-info"></i>
+                                            </a>
                                         </span>
-
                                     </div>
                                 </div>
                             </div>
@@ -148,44 +162,39 @@
                 </div>
             </div>
             <div class="col-xxl-3">
-                <div class="row">
-                    <div class="col-xxl-12 col-xl-12">
-                        <div class="card custom-card card-bg-success ecommerce-card">
-                            <div class="card-header border-bottom-0">
-                                <div class="card-title text-fixed-white">
-                                    Locked Funds
-                                </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="d-flex align-items-start gap-3 px-3">
-                                    <div class="main-card-icon secondary p-0">
-                                        <div
-                                            class="avatar avatar-lg p-2 bg-white-transparent svg-white shadow-sm">
-                                            <div class="avatar avatar-sm svg-white">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"
-                                                    fill="#000000" viewBox="0 0 256 256">
-                                                    <path d="M96,40l33.52,88H56Zm104,88H129.52L160,208Z"
-                                                        opacity="0.2"></path>
-                                                    <path
-                                                        d="M240,128a8,8,0,0,1-8,8H204.94l-37.78,75.58A8,8,0,0,1,160,216h-.4a8,8,0,0,1-7.08-5.14L95.35,60.76,63.28,131.31A8,8,0,0,1,56,136H24a8,8,0,0,1,0-16H50.85L88.72,36.69a8,8,0,0,1,14.76.46l57.51,151,31.85-63.71A8,8,0,0,1,200,120h32A8,8,0,0,1,240,128Z">
-                                                    </path>
-                                                </svg>
-                                            </div>
-                                        </div>
+                <div class="card custom-card card-bg-primary crypto-card pt-2">
+                    <div class="card-body">
+                        <div>
+                            <span class="text-fixed-white op-8">Total Portfolio Value 
+                                <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-dark" title="The total value of all funds in your account, including savings, investments, and trading balances." class="text-fixed-white mx-1">
+                                    <i class="fe fe-info"></i>
+                                </a>
+                            </span>
+                            <h4 class="fw-semibold d-block text-fixed-white mt-2">
+                                {{ number_format($portfolio, 2) }}
+                                <span class="fs-12 ms-1 d-inline-flex" style="margin-top: -5px;">USD</span>
+                            </h4>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="text-center p-2 my-2 bg-white-transparent rounded">
+                                    <div class="d-flex">
+                                        <span class="fs-10 tooltip-container">Reserved Fund 
+                                            <a href="javascript:void(0);" class="tooltip-trigger text-fixed-white mx-1"  data-tooltip="Funds available for withdrawal or transfer, not currently in use.">
+                                                <i class="fe fe-info"></i>
+                                            </a>
+                                        </span>
                                     </div>
-                                    <div class="flex-fill">
-                                        <div class="mb-2">Overall locked funds</div>
-                                        <div class="text-muted mb-0 fs-18 d-flex align-items-center">
-                                            <h5 class="fs-26 fw-bold mb-0 flex-fill fw-medium text-fixed-white" style="margin-top: -8px;">
-                                                &#36;{{ number_format($lockedFunds, 2) }}
-                                            </h5>
-                                        </div>
+                                    <div class="d-flex">
+                                        <span class="fs-18 fw-semibold text-start">{{ number_format($lockedFunds, 2) }} USD</span>
                                     </div>
+                                    <div class="mt-1">  </div>
                                 </div>
-                                <div class="audience-report"></div>
                             </div>
                         </div>
                     </div>
+                    <div class="audience-report"></div>
+                </div>
                     <div class="col-xxl-12 col-xl-12">
                         <div class="card custom-card overflow-hidden">
                             <div class="card-header justify-content-between">
@@ -213,209 +222,56 @@
                                 <div class="row mt-0">
                                     <div class="col-4 border-end border-inline-end-dashed text-center">
                                         <p class="text-muted mb-1 fs-10">Savings</p>
-                                        <h6 class="fw-semibold fs-14">{{ number_format($savingsPercentage, 2) }}%</h6>
+                                        <h6 class="fw-semibold fs-14"> &#36;{{ number_format($savings, 2) }}  <span class="fs-9 text-muted">{{ number_format($savingsPercentage, 2) }}% </span></h6>
                                     </div>
                                     <div class="col-4 border-end border-inline-end-dashed text-center">
                                         <p class="text-muted mb-1 fs-10">Investment</p>
-                                        <h6 class="fw-semibold fs-14">{{ number_format($investmentPercentage, 2) }}%</h6>
+                                        <h6 class="fw-semibold fs-14"> &#36;{{ number_format($investment, 2) }}  <span class="fs-9 text-muted">{{ number_format($investmentPercentage, 2) }}% </span></h6>
                                     </div>
                                     <div class="col-4 text-center">
                                         <p class="text-muted mb-1 fs-10">Trading</p>
-                                        <h6 class="fw-semibold fs-14">{{ number_format($tradingPercentage, 2) }}%</h6>
+                                        <h6 class="fw-semibold fs-14"> &#36;{{ number_format($trading, 2) }}  <span class="fs-9 text-muted">{{ number_format($tradingPercentage, 2) }}% </span></h6>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+            </div>
             </div>
             <div class="col-xxl-12">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="swiper swiper-basic">
                         <div class="swiper-wrapper">
+                            @foreach ($slidesData as $slide)
                             <div class="swiper-slide">
                                 <div class="card custom-card">
                                     <div class="card-body">
-                                        <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between p-3 bg-success-transparent border">
+                                        <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between p-3 border rounded bg-{{ $slide['colorClass'] }}-transparent">
                                             <div class="d-flex flex-fill align-items-center">
                                                 <div class="me-2">
-                                                    <span class="avatar avatar-sm bg-success p-2">
-                                                        <i class="bi bi-apple  fs-18"></i>
+                                                    <span class="avatar avatar-sm rounded-circle bg-dark bg-opacity-10 border border-white p-2">
+                                                         <img src="{{ $slide['icon'] }}" alt="{{ $slide['icon'] }}">
                                                     </span>
                                                 </div>
                                                 <div class="lh-1">
-                                                    <span
-                                                        class="d-block mb-2 text-default fw-medium">Apple</span>
-                                                    <span class="d-block fs-12">$12,289.44</span>
+                                                    <span class="d-block mb-2 text-default fw-medium" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;" title="{{ $slide['name'] }}">
+                                                        {{ $slide['name'] }}
+                                                    </span>
+                                                    <span class="d-block fs-12 fw-bold">{{ $slide['price'] }}</span>
                                                 </div>
                                             </div>
                                             <div class="fs-12 text-end">
-                                                <span class="text-success d-block">0.14%<i
-                                                        class="ti ti-arrow-bear-right"></i></span>
-                                                <span class="d-block text-success">+$1,780.80</span>
+                                                <span class="{{ strpos($slide['percentageChange'], '-') !== false ? 'text-danger' : 'text-success' }} d-block">
+                                                    {{ $slide['percentageChange'] }}
+                                                    <i class="ti {{ $slide['changeDirection'] }}"></i>
+                                                </span>
+                                                <span class="text-{{ $slide['colorClass'] }} d-block fs-10">{{ $slide['changeAmount'] }}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="swiper-slide">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between p-3 border rounded bg-secondary-transparent">
-                                            <div class="d-flex flex-fill align-items-center">
-                                                <div class="me-2">
-                                                    <span class="avatar avatar-sm bg-secondary p-2">
-                                                        <i class="bi bi-currency-bitcoin  fs-18"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="lh-1">
-                                                    <span
-                                                        class="d-block mb-2 text-default fw-medium">Bitcoin</span>
-                                                    <span class="d-block fs-12">$58,151.02</span>
-                                                </div>
-                                            </div>
-                                            <div class=" fs-12 text-end">
-                                                <span class="text-success d-block">2.14%<i
-                                                        class="ti ti-arrow-bear-right"></i></span>
-                                                <span class="text-secondary d-block">+$5,745.62</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div class="d-flex gap-2 flex-wrap align-items-center justify-content-between p-3 border rounded bg-info-transparent">
-                                            <div class="d-flex flex-fill align-items-center">
-                                                <div class="me-2">
-                                                    <span class="avatar avatar-sm bg-info p-2">
-                                                        <i class="bi bi-card-list  fs-18"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="lh-1">
-                                                    <span
-                                                        class="d-block mb-2 text-default fw-medium">Tesla</span>
-                                                    <span class="d-block fs-12">$14,452.36</span>
-                                                </div>
-                                            </div>
-                                            <div class=" fs-12 text-end">
-                                                <span class="text-danger d-block">4.02%<i
-                                                        class="ti ti-arrow-bear-right"></i></span>
-                                                <span class="d-block text-info">+$4,125.63</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div
-                                            class="d-flex gap-2 flex-wrap align-items-center justify-content-between p-3 border rounded bg-dark-transparent">
-                                            <div class="d-flex flex-fill align-items-center">
-                                                <div class="me-2">
-                                                    <span class="avatar avatar-sm bg-dark p-2">
-                                                        <i class="bi bi-gift  fs-18"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="lh-1">
-                                                    <span
-                                                        class="d-block mb-2 text-default fw-medium">Amazon</span>
-                                                    <span class="d-block fs-12">$63,251.11</span>
-                                                </div>
-                                            </div>
-                                            <div class=" fs-12 text-end">
-                                                <span class="text-success d-block">5.14%<i
-                                                        class="ti ti-arrow-bear-right"></i></span>
-                                                <span class="text-dark d-block">+$936.30</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div
-                                            class="d-flex flex-wrap align-items-center justify-content-between p-3 border rounded bg-danger-transparent">
-                                            <div class="d-flex flex-fill align-items-center">
-                                                <div class="me-2">
-                                                    <span class="avatar avatar-sm bg-danger p-2">
-                                                        <i class="bi bi-truck  fs-18"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="lh-1">
-                                                    <span
-                                                        class="d-block mb-2 text-default fw-medium">Aliexpress</span>
-                                                    <span class="d-block fs-12">$5,401.50</span>
-                                                </div>
-                                            </div>
-                                            <div class=" fs-12 text-end">
-                                                <span class="text-success d-block">3.32%<i
-                                                        class="ti ti-arrow-bear-right"></i></span>
-                                                <span class="d-block">+$4,360.65</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div
-                                            class="d-flex flex-wrap align-items-center justify-content-between p-3 border rounded bg-warning-transparent">
-                                            <div class="d-flex flex-fill align-items-center">
-                                                <div class="me-2">
-                                                    <span class="avatar avatar-sm bg-warning p-2">
-                                                        <i class="bi bi-phone  fs-18"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="lh-1">
-                                                    <span
-                                                        class="d-block mb-2 text-default fw-medium">Samsung</span>
-                                                    <span class="d-block fs-12">$10,732.12</span>
-                                                </div>
-                                            </div>
-                                            <div class=" fs-12 text-end">
-                                                <span class="text-danger d-block">1.24%<i
-                                                        class="ti ti-arrow-bear-right"></i></span>
-                                                <span class="text-warning d-block">+$3,221.29</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card custom-card">
-                                    <div class="card-body">
-                                        <div
-                                            class="d-flex gap-2 flex-wrap align-items-center justify-content-between p-3 border rounded bg-primary-transparent">
-                                            <div class="d-flex flex-fill align-items-center">
-                                                <div class="me-2">
-                                                    <span class="avatar avatar-sm bg-primary p-2">
-                                                        <i class="bi bi-nvidia  fs-18"></i>
-                                                    </span>
-                                                </div>
-                                                <div class="lh-1">
-                                                    <span
-                                                        class="d-block mb-2 text-default fw-medium">Nvidia</span>
-                                                    <span class="d-block fs-12">$23,235.25</span>
-                                                </div>
-                                            </div>
-                                            <div class=" fs-12 text-end">
-                                                <span class="text-success d-block">1.14%<i
-                                                        class="ti ti-arrow-bear-right"></i></span>
-                                                <span class="text-primary d-block">+$5,745.62</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -423,39 +279,30 @@
         </div>
         <!-- End:: row-1 -->
 
+        <!-- Start:: row-3 -->
         <div class="row">
-            <div class="col-xxl-9" style="height: 620px;">
-                <!-- TradingView Widget BEGIN -->
-                <div class="tradingview-widget-container">
+            <div class="col-xl-9" style="height: 580px;">
+                <div class="tradingview-widget-container" style="height: max-content;">
                     <div class="tradingview-widget-container__widget"></div>
-                    <script type="text/javascript">
-                        // Define all possible symbols
-                        const allSymbols = [
-                            ["Apple", "AAPL|1D"],
-                            ["Google", "GOOGL|1D"],
-                            ["Microsoft", "MSFT|1D"],
-                            ["Amazon", "AMZN|1D"],
-                            ["Tesla", "TSLA|1D"],
-                            ["Facebook", "META|1D"],
-                            ["Netflix", "NFLX|1D"],
-                            ["Nvidia", "NVDA|1D"]
-                        ];
-
-                        // Function to shuffle and select a subset of symbols
-                        function getRandomSymbols(symbols, count) {
-                            for (let i = symbols.length - 1; i > 0; i--) {
-                                const j = Math.floor(Math.random() * (i + 1));
-                                [symbols[i], symbols[j]] = [symbols[j], symbols[i]];
-                            }
-                            return symbols.slice(0, count);
-                        }
-
-                        // Get 3 random symbols
-                        const selectedSymbols = getRandomSymbols(allSymbols, 3);
-
-                        // Inject the symbols into the TradingView widget config
-                        const widgetConfig = {
-                            "symbols": selectedSymbols,
+                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js" async>
+                        { 
+                            "symbols": [
+                                [
+                                "Apple",
+                                "AAPL|1D"
+                                ],
+                                [
+                                "Google",
+                                "GOOGL|1D"
+                                ],
+                                [
+                                "Microsoft",
+                                "MSFT|1D"
+                                ],
+                                [
+                                "NASDAQ:NVDA|1D"
+                                ]
+                            ],
                             "chartOnly": false,
                             "width": "100%",
                             "height": "95%",
@@ -489,156 +336,49 @@
                                 "60m|1W",
                                 "all|1M"
                             ]
-                        };
-
-                        // Create the TradingView widget
-                        const script = document.createElement('script');
-                        script.src = "https://s3.tradingview.com/external-embedding/embed-widget-symbol-overview.js";
-                        script.async = true;
-                        script.innerHTML = JSON.stringify(widgetConfig);
-                        document.querySelector('.tradingview-widget-container__widget').appendChild(script);
+                        }
                     </script>
                 </div>
-                <!-- TradingView Widget END -->
             </div>
-
-            <div class="col-xxl-3">
-                <div class="card custom-card card-bg-grey ecommerce-card" style="background: #09005b;">
-                    <!-- TradingView Widget BEGIN -->
-                    <div class="tradingview-widget-container">
-                        <div class="tradingview-widget-container__widget"></div>
-                        <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js" async>
-                            {
-                                "symbol": "FX:EURUSD",
-                                "width": "100%",
-                                "isTransparent": true,
-                                "colorTheme": "dark",
-                                "locale": "en"
-                            }
-                        </script>
-                    </div>
-                    <!-- TradingView Widget END -->
-                </div>
-                <div class="col-xxl-12 col-xl-12">
-                    <div class="card custom-card overflow-hidden">
-                        <div class="card-header justify-content-between">
-                            <div class="card-title"> Popular Traders </div>
-                        </div>
-                        <div class="card-body p-0" id="top-collector">
-                            <div class="table-responsive">
-                                <table class="table table-hover text-nowrap">
-                                    <tbody>
-                                        <p class="text-center my-5 py-5">No top traders</p>
-                                        <!-- <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2"> <span
-                                                            class="avatar avatar-md p-1 avatar-rounded bg-light">
-                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png" alt="">
-                                                        </span> </div>
-                                                    <div class="fw-medium">
-                                                        <p class="mb-0">Alicia Smith</p>
-                                                        <span class="fs-12 text-muted">980 Itmes</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end">
-                                                <p class="mb-0 fw-semibold">$9,223.46</p>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2"> <span
-                                                            class="avatar avatar-md p-1 avatar-rounded bg-light">
-                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png" alt="">
-                                                        </span> </div>
-                                                    <div class="fw-medium">
-                                                        <p class="mb-0">Alex Carey</p>
-                                                        <span class="fs-12 text-muted">126 Itmes</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end">
-                                                <p class="mb-0 fw-semibold">$17,239.09</p>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2"> <span
-                                                            class="avatar avatar-md p-1 avatar-rounded bg-light">
-                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png" alt="">
-                                                        </span> </div>
-                                                    <div class="fw-medium">
-                                                        <p class="mb-0">Emiley Jack</p>
-                                                        <span class="fs-12 text-muted">170 Itmes</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end">
-                                                <p class="mb-0 fw-semibold">$5,902.83</p>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2"> <span
-                                                            class="avatar avatar-md p-1 avatar-rounded bg-light">
-                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png" alt="">
-                                                        </span> </div>
-                                                    <div class="fw-medium">
-                                                        <p class="mb-0">Jessica</p>
-                                                        <span class="fs-12 text-muted">220 Itmes</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end">
-                                                <p class="mb-0 fw-semibold">$3,993.09</p>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2"> <span
-                                                            class="avatar avatar-md p-1 avatar-rounded bg-light">
-                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png" alt="">
-                                                        </span> </div>
-                                                    <div class="fw-medium">
-                                                        <p class="mb-0">Toni Stark</p>
-                                                        <span class="fs-12 text-muted">160 Itmes</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="text-end">
-                                                <p class="mb-0 fw-semibold">$12,124.34</p>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="border-bottom-0">
-                                                <div class="d-flex align-items-center">
-                                                    <div class="me-2"> <span
-                                                            class="avatar avatar-md p-1 avatar-rounded bg-light">
-                                                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png" alt="">
-                                                        </span> </div>
-                                                    <div class="fw-medium">
-                                                        <p class="mb-0">Kiara May</p>
-                                                        <span class="fs-12 text-muted">120 Itmes</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="border-bottom-0 text-end">
-                                                <p class="mb-0 fw-semibold">$2,534.56</p>
-                                            </td>
-                                        </tr> -->
-                                    </tbody>
-                                </table>
+            <div class="col-xl-3">
+                <div class="row">
+                    <div class="col-xl-12 col-lg-12 col-md-6">
+                        <div class="card custom-card">
+                            <!-- TradingView Widget BEGIN -->
+                            <div class="tradingview-widget-container">
+                                <div class="tradingview-widget-container__widget"></div>
+                                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js" async>
+                                    {
+                                        "colorTheme": "light",
+                                        "dateRange": "1M",
+                                        "exchange": "US",
+                                        "showChart": true,
+                                        "locale": "en",
+                                        "largeChartUrl": "",
+                                        "isTransparent": false,
+                                        "showSymbolLogo": false,
+                                        "showFloatingTooltip": false,
+                                        "width": "100%",
+                                        "height": "550",
+                                        "plotLineColorGrowing": "rgba(201, 10, 255, 1)",
+                                        "plotLineColorFalling": "rgba(201, 10, 255, 1)",
+                                        "gridLineColor": "rgba(42, 46, 57, 0)",
+                                        "scaleFontColor": "rgba(19, 23, 34, 1)",
+                                        "belowLineFillColorGrowing": "rgba(41, 98, 255, 0.12)",
+                                        "belowLineFillColorFalling": "rgba(41, 98, 255, 0.12)",
+                                        "belowLineFillColorGrowingBottom": "rgba(41, 98, 255, 0)",
+                                        "belowLineFillColorFallingBottom": "rgba(41, 98, 255, 0)",
+                                        "symbolActiveColor": "rgba(41, 98, 255, 0.12)"
+                                    }
+                                </script>
                             </div>
+                            <!-- TradingView Widget END -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+        <!-- End:: row-3 -->
 
         <!-- Start:: row-3 -->
         <div class="row">
@@ -716,7 +456,6 @@
             </div>
         </div>
         <!-- End:: row-3 -->
-
     </div>
 </div>
 <!-- End::app-content -->
@@ -732,7 +471,7 @@
 <script src="{{ asset('asset/js/stocks-dashboard.js') }}"></script>
 
 <!-- Custom JS -->
-<script src="{{ asset('asset/js/custom.js') }}"></script>
+<!-- <script src="{{ asset('asset/js/custom.js') }}"></script> -->
 
 <script>
     // Convert the PHP data into JavaScript arrays
