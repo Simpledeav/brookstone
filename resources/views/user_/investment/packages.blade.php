@@ -31,6 +31,25 @@
         margin-top: auto;
     }
 
+    .truncate {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden !important;
+        text-overflow: ellipsis;
+    }
+
+    .image-box {
+      width: 100%;
+      height: 200px; /* Set your desired height */
+      overflow: hidden; /* Ensures the image doesn't overflow the box */
+    }
+    .image-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
 </style>
 
 <!-- Start::app-content -->
@@ -64,15 +83,15 @@
         <!-- Start:: row-1 -->
         <div class="row d-flex flex-wrap">
             @foreach($packages as $package)
-                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-lg-0 mb-4 d-flex align-items-stretch">
+                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-12 mb-lg-0 mb-4 d-flex">
                     <div class="card custom-card card-style-2 flex-grow-1"> 
                         <div class="card-body p-0"> 
-                            <span class="ribbon-4 ribbon-secondary top-left">
+                            <span class="ribbon-4 ribbon-primary top-left">
                                 <span>{{ $package->roi }}%</span>
                             </span>
                             <div class="card-img-top"> 
                                 <a href="product-details.html" class="stretched-link"></a> 
-                                <div class="img-box-2 p-2"> 
+                                <div class="img-box-2 p-2 image-box"> 
                                     <img src="{{ $package->image }}" alt="img" class=" img-fluid w-100 rounded" style="max-height: 250px;"> 
                                 </div> 
                             </div> 
@@ -91,18 +110,21 @@
                                                 </span>
                                             </div> 
                                         </div> 
-                                        <div class="d-flex align-items-center justify-content-between"> 
+                                        <div class="d-flex align-items-center justify-content-between mt-1"> 
                                             <h6 class="truncate-2-lines mb-1 fw-semibold fs-16">
                                                 <a href="/invest/{{ $package['name'] }}">{{ $package->name }}</a> 
                                             </h6>
                                         </div> 
+                                        <div>
+                                            <p class="text-muted truncate">{{ $package->description }}</p>
+                                        </div>
                                     </div> 
                                 </div> 
                             </div> 
                         </div> 
-                        <div class="card-footer border-top-0 pt-0 text-center d-grid"> 
-                            <div class="d-flex align-items-center justify-content-between py-2"> 
-                                <span class="mt-1">
+                        <div class="card-footer border-top-0 d-grid mt-0 pt-0"> 
+                            <div class="d-flex align-items-center text-center justify-content-between py-2"> 
+                                <span class="mt-">
                                     <span class="fs-20 fw-semibold text-primary">
                                         {{ number_format($package->min_amount, 2) }} <span class="fs-14 text-muted">USD</span> 
                                     </span>

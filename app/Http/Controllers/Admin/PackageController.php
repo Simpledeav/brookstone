@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
-use App\Models\Package;
 use App\Models\Plan;
+use App\Models\Package;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 
 class PackageController extends Controller
 {
     public function index()
     {
-        return view('admin.package.index', ['packages' => Package::where('investment', 'enabled')->get()]);
+        return view('admin.package.index', ['packages' => Package::latest()->get()]);
     }
 
     public function indexAll()
@@ -32,7 +32,7 @@ class PackageController extends Controller
 
     public function edit(Package $package)
     {
-        return view('admin.package.edit', ['package' => $package]);
+        return view('admin.package.update', ['package' => $package]);
     }
 
     public function store(Request $request): \Illuminate\Http\RedirectResponse
@@ -86,7 +86,7 @@ class PackageController extends Controller
             'name' => ['required', 'unique:plans,name,' . $id],
             'roi' => ['required', 'numeric'],
             'description' => ['required'],
-            'img' => ['required'],
+            'img' => ['sometimes'],
         ]);
 
         if ($validator->fails()) {
@@ -107,6 +107,51 @@ class PackageController extends Controller
         // Update package
         if ($package->update($data)) {
             return redirect()->route('admin.saving.package')->with('success', 'Package updated successfully');
+        }
+
+        return back()->with('error', 'Error updating package');
+    }
+
+    public function updatePackage(Request $request, Package $package): \Illuminate\Http\RedirectResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'unique:packages,name,'.$package['id']],
+            'min_amount' => ['required', 'numeric', 'gt:0'],
+            'max_amount' => ['required', 'numeric', 'gt:0'],
+            'duration' => ['required'],
+            'roi' => ['required', 'numeric'],
+            'milestone' => ['required', 'numeric'],
+            'description' => ['required'],
+            'image' => ['sometimes', 'mimes:jpeg,jpg,png', 'max:1024'],
+            'investment' => ['required', 'in:enabled,disabled'],
+        ]);
+
+        if ($validator->fails()){
+            return back()->withErrors($validator)->withInput()->with('error', 'Invalid input data');
+        }
+
+        $data = $request->except('image');
+
+        if ($request->file('image')){
+            $data['image'] = $this->uploadPackageImageAndReturnPathToSave($request['image']);
+        }
+
+        if ($package->update($data)){
+            return redirect()->route('admin.packages')->with('success', 'Package updated successfully');
+        }
+
+        return back()->with('error', 'Error updating package');
+    }
+
+    public function togglePackage(Package $package): \Illuminate\Http\RedirectResponse
+    {
+
+        if($package->investment == 'enabled') {
+            $package->update(['investment' => 'disabled']);
+            return redirect()->route('admin.packages')->with('success', 'Package disabled successfully');
+        } else {
+            $package->update(['investment' => 'enabled']);
+            return redirect()->route('admin.packages')->with('success', 'Package enabled successfully');
         }
 
         return back()->with('error', 'Error updating package');

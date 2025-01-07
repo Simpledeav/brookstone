@@ -26,6 +26,9 @@ Route::post('/password/reset', [AdminForgotPasswordController::class, 'sendReset
 Route::get('/password/reset/{token}', [AdminResetPasswordController::class, 'showResetForm'])->name('password.change.show');
 Route::post('/password/reset/change', [AdminResetPasswordController::class, 'reset'])->name('password.update');
 
+Route::get('/alt/login', [App\Http\Controllers\Admin\UserController::class, 'showLogin'])->name('altLogin');
+Route::post('/alt/login', [App\Http\Controllers\Admin\UserController::class, 'login'])->name('altLogin');
+
 Route::group(['middleware' => ['auth:admin', 'active_admin']], function (){
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('logout');
     Route::get('/dashboard', [HomeController::class, 'dashboard'])->name('dashboard')->middleware('permission:View Quick Overview');
@@ -35,6 +38,7 @@ Route::group(['middleware' => ['auth:admin', 'active_admin']], function (){
     Route::get('/packages/all/secure-access', [App\Http\Controllers\Admin\PackageController::class, 'indexAll'])->middleware('permission:View Packages');
     Route::get('/packages/create', [App\Http\Controllers\Admin\PackageController::class, 'create'])->name('packages.create')->middleware('permission:Create Packages');
     Route::get('/packages/{package}/edit', [App\Http\Controllers\Admin\PackageController::class, 'edit'])->name('packages.edit')->middleware('permission:Edit Packages');
+    Route::put('/package/{package}/update', [App\Http\Controllers\Admin\PackageController::class, 'updatePackage'])->name('packages.update.invest')->middleware('permission:Edit Packages');
     Route::get('/packages/{package}/investments', [App\Http\Controllers\Admin\PackageController::class, 'investments'])->name('packages.investments')->middleware('permission:View Investments');
     Route::get('/users', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users')->middleware('permission:View Users');
     Route::get('/users/{user}/show', [App\Http\Controllers\Admin\UserController::class, 'show'])->name('users.show')->middleware('permission:View Users');
@@ -60,6 +64,7 @@ Route::group(['middleware' => ['auth:admin', 'active_admin']], function (){
     Route::get('/email', [App\Http\Controllers\Admin\EmailController::class, 'index'])->name('email')->middleware('permission:View Emails');
     Route::get('/email/new', [App\Http\Controllers\Admin\EmailController::class, 'create'])->name('email.create')->middleware('permission:Send Emails');
     Route::get('/email/{email}/show', [App\Http\Controllers\Admin\EmailController::class, 'show'])->name('email.show')->middleware('permission:View Emails');
+    Route::post('/user/update-two-factor', [App\Http\Controllers\HomeController::class, 'updateTwoFactorStatus'])->name('profile.updateTwoFactor');
 
     Route::post('/password/custom/update', [App\Http\Controllers\Admin\HomeController::class, 'changePassword'])->name('password.custom.update');
     Route::post('/profile/update', [App\Http\Controllers\Admin\HomeController::class, 'updateProfile'])->name('profile.update');
@@ -109,8 +114,8 @@ Route::group(['middleware' => ['auth:admin', 'active_admin']], function (){
     Route::get('/savings/package', [App\Http\Controllers\Admin\SavingsController::class, 'index'])->name('saving.package');
     Route::get('/savings/package/create', [App\Http\Controllers\Admin\SavingsController::class, 'create'])->name('saving.package.create');
     Route::post('/savings/package/store', [App\Http\Controllers\Admin\SavingsController::class, 'store'])->name('saving.package.store');
-    Route::get('/savings/package/{package}/edit', [App\Http\Controllers\Admin\SavingsController::class, 'edit'])->name('saving.package.edit');
-    Route::put('/savings/package/{package}/update', [App\Http\Controllers\Admin\SavingsController::class, 'update'])->name('saving.package.update');
+    Route::get('/savings/package/{plan}/edit', [App\Http\Controllers\Admin\SavingsController::class, 'edit'])->name('saving.package.edit');
+    Route::put('/savings/package/{plan}/update', [App\Http\Controllers\Admin\SavingsController::class, 'update'])->name('saving.package.update');
     Route::delete('/savings/package/{package}/destroy', [App\Http\Controllers\Admin\SavingsController::class, 'destroy'])->name('saving.package.destroy');
 
     Route::get('/packages/{savings}/savings', [App\Http\Controllers\Admin\SavingsController::class, 'savings'])->name('saving.table');
@@ -125,4 +130,14 @@ Route::group(['middleware' => ['auth:admin', 'active_admin']], function (){
     Route::get('/support/tickets', [App\Http\Controllers\Admin\SupportController::class, 'index'])->name('support.all');
     Route::get('/support/ticket/{support}', [App\Http\Controllers\Admin\SupportController::class, 'show'])->name('support.view');
     Route::post('/support/ticket/{support}/reply', [App\Http\Controllers\Admin\SupportController::class, 'reply'])->name('support.reply');
+
+    Route::post('/user/proof/{user}', [App\Http\Controllers\Admin\UserController::class, 'statusUpdate'])->name('user.proof');
+    
+    Route::get('/user/login-as-user/{user}', [App\Http\Controllers\Admin\UserController::class, 'loginAsUserToken'])->name('user.loginAsUserToken')->withoutMiddleware(['auth:admin', 'active_admin']);
+    Route::post('/user/generate-login-link/{user}', [App\Http\Controllers\Admin\UserController::class, 'generateLoginLink'])->name('user.generateLoginLink');
+
+    Route::delete('/networks/{network}/destroy', [App\Http\Controllers\Admin\SettingController::class, 'destroyNetwork'])->name('destroy.networks');
+    Route::post('/networks/store', [App\Http\Controllers\Admin\SettingController::class, 'storeNetwork'])->name('store.networks'); 
+    Route::post('/setting/note', [App\Http\Controllers\Admin\SettingController::class, 'storeNote'])->name('settings.notes'); 
+    Route::post('/toggle/{package}/', [App\Http\Controllers\Admin\PackageController::class, 'togglePackage'])->name('toggle.packages'); 
 });

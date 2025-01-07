@@ -69,22 +69,6 @@
                                 </div>
                             </div>
                         </div>
-                        @if($user->is_approved == "pending" | $user->is_approved == "decline")
-                        <div class="col-md-6 col-sm-12">
-                            <div class="card text-center selectdepo mx-auto pt-5" id="">
-                                <div class="card-body align-items-center rounded">
-                                    <span class="avatar avatar-md bg-primary me-2 shadow-avatar mb-3">
-                                        <img class="p-1" src="https://pngimg.com/d/bank_PNG24.png" alt="">
-                                    </span>
-                                    <h5 class="fw-bold fs-14 mt-2 mx-2"> 
-                                        Bank
-                                    </h5>
-                                    <p class="text-center text-muted fs-10" style="margin-top: -5px;">Deposit funds through a bank transfer.</p>
-                                    <p class="text-center text-danger fs-11 fw-bold" style="margin-top: -5px;">Click <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#modalProof">here</a> to complete your verification.</p>
-                                </div>
-                            </div>
-                        </div>
-                        @else
                         <div class="col-md-6 col-sm-12">
                             <div class="card text-center selectdepo mx-auto pt-5" id="selectBank">
                                 <div class="card-body align-items-center rounded">
@@ -95,10 +79,12 @@
                                         Bank
                                     </h5>
                                     <p class="text-center text-muted fs-10" style="margin-top: -5px;">Deposit funds through a bank transfer.</p>
+                                    @if($user->is_approved == "pending" | $user->is_approved == "decline")
+                                        <p class="text-center text-danger fs-11 fw-bold" style="margin-top: -5px;">Click <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#modalProof">here</a> to complete your verification.</p>
+                                    @endif
                                 </div>
                             </div>
                         </div>
-                        @endif
                     </div>
                     <div id="crypto" class="d-none">
                         <input type="hidden" id="crypto-method" name="method" value="coin">
@@ -164,12 +150,12 @@
                             <div id="" class="alert mx-auto alert-primary mt-2" style="max-width: 6000px;">
                                 <h4 class="text-danger fs-13">Note</h4>
                                 <div class="">
-                                    <!-- <p class="fs-12 text-muted">{{ $setting->crypto_note }}</p> -->
-                                    <ul class="text-dark">
+                                    <p class="fs-12 text-muted">{!! $setting->crypto_note !!}</p>
+                                    <!-- <ul class="text-dark">
                                         <li>Ensure you select the correct cryptocurrency and blockchain network before making the deposit.</li>
                                         <li>Do not send unsupported cryptocurrencies or tokens to this address, as they will be permanently lost.</li>
                                         <li>Deposits will be credited to your account after the required number of network confirmations (e.g., Bitcoin: 3 confirmations, Ethereum: 12 confirmations).</li>
-                                    </ul>
+                                    </ul> -->
                                 </div>
                             </div>
                             <!-- <p class="text-dark fs-13 text-center fw-medium">Already made payment of <span class="fw-bold text-primary amount-val">0 ---</span> to the wallet address above <br> Click the button below to confirm transaction.</p> -->
@@ -240,56 +226,40 @@
                                                 <i class="fe fe-info"></i>
                                             </a>
                                         </div>
+                                        <div class="input-group my-1">
+                                            <button type="button" class="input-group-text btn btn-light-light btn-wave fs-10">Routing Number</button>
+                                            <input type="text" name="routing" class="form-control fw-bold" placeholder="Enter Method..." aria-label="Stock Quantity" value="{{ $setting->routing }}" disabled>
+                                            <!-- <button type="button" class="input-group-text btn btn-dark-light btn-wave copy-btn text-primary fs-13"><i class="ri-file-copy-fill text-primary me-2"></i> Copy</button> -->
+                                            <!-- <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-dark" title="Include this reference in your bank transfer to ensure proper allocation" class="text-muted input-group-text btn btn-dark-light btn-wave">
+                                                <i class="fe fe-info"></i>
+                                            </a> -->
+                                        </div>
                                     </div>
                                     <div class="col-xl-12 my-3" style="max-width: 500px;">
                                         <div class="row">
                                             <div class="col-lg-8 col-6">
                                                 <div class="">
                                                     <label for="" class="fs-10 text-dark">Bank Address:</label>
-                                                    <p class="text-muted fw-bold fs-12">{{ $setting->bank_address }}, {{ $setting->bank_state }} {{ $setting->bank_country }} 
+                                                    <p class="text-muted fw-bold fs-12">{{ $setting->bank_address }} 
                                                         <a href="javascript:void(0);" data-bs-toggle="tooltip" data-bs-custom-class="tooltip-dark" title="Contact this email for any deposit-related issues." class="text-muted mx-1">
                                                             <i class="fe fe-info"></i>
                                                         </a>
                                                     </p>
                                                 </div>
                                             </div>
-                                            <div class="col-lg-4 col-6">
-                                                <!-- <div class="">
-                                                    <label for="" class="fs-10 text-dark">Phone:</label>
-                                                    <p class="text-muted fw-bold fs-12">{{ $setting->bank_phone }}</p>
-                                                </div> -->
-                                            </div>
-                                            <!-- <div class="col-lg-4 col-6">
-                                                <div class="">
-                                                    <label for="" class="fs-10">Country:</label>
-                                                    <p class="text-muted fw-bold fs-12">{{ $setting->bank_country }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-4 col-6">
-                                                <div class="">
-                                                    <label for="" class="fs-10">State:</label>
-                                                    <p class="text-muted fw-bold fs-12">{{ $setting->bank_state }}</p>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-4 col-6">
-                                                <div class="">
-                                                    <label for="" class="fs-10">Address:</label>
-                                                    <p class="text-muted fw-bold fs-12">{{ $setting->bank_address_address }}</p>
-                                                </div>
-                                            </div> -->
                                         </div>
                                     </div>
                                     <div style="max-width: 500px;">
                                         <div id="" class="alert mx-1 alert-primary mt-2">
                                             <h4 class="text-danger fs-12 fw-bold">Please Note</h4>
                                             <div class="">
-                                                    <!-- <p class="fs-12 text-muted">{{ $setting->bank_note_initial }}</p> -->
-                                                    <ul class="text-dark fs-12 text-muted">
+                                                    <p class="fs-12 text-muted">{!! $setting->bank_note_initial !!}</p>
+                                                    <!-- <ul class="text-dark fs-12 text-muted">
                                                         <li>Ensure the deposit amount matches your entry above to avoid discrepancies.</li>
                                                         <li>Include the transaction reference in your transfer details for proper allocation.</li>
                                                         <li>International deposits may take up to 3-5 business days to reflect.</li>
                                                         <li>For questions, contact our support team.</li>
-                                                    </ul>
+                                                    </ul> -->
                                             </div>
                                         </div>
                                     </div>
@@ -388,13 +358,7 @@
                                                 <div id="" class="alert alert-primary mt-2">
                                                     <h4 class="text-danger fs-12 fw-bold">Please Note</h4>
                                                     <div class="">
-                                                            <!-- <p class="fs-11 text-muted">{{ $setting->bank_note_final }}</p> -->
-                                                            <ul class="text-dark fs-12 text-muted">
-                                                                <li>Ensure all information entered matches your bank transaction details to avoid delays..</li>
-                                                                <li>Upload a clear and complete copy of your transfer receipt.</li>
-                                                                <li>Once submitted, our team will verify your deposit within 1-3 business days.</li>
-                                                                <li>For any issues, contact support.</li>
-                                                            </ul>
+                                                            <p class="fs-11 text-muted">{!! $setting->bank_note_final !!}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -633,16 +597,18 @@
     });
 
     document.getElementById('selectBank').addEventListener('click', function() {
-        // Show bank fields, hide crypto fields
-        document.getElementById('crypto').classList.add('d-none');
-        document.getElementById('bank').classList.remove('d-none');
+        if ("{{ $user->is_approved }}" === "approved") {
+            // Show bank fields, hide crypto fields
+            document.getElementById('crypto').classList.add('d-none');
+            document.getElementById('bank').classList.remove('d-none');
 
-        // Show the footer
-        document.getElementById('depositFooter').classList.add('d-none');
-        document.getElementById('depoSelect').classList.add('d-none');
-        
-        document.getElementById('back-arrow').classList.remove('d-none');
-        document.getElementById('back-arrow').classList.add('d-block');
+            // Show the footer
+            document.getElementById('depositFooter').classList.add('d-none');
+            document.getElementById('depoSelect').classList.add('d-none');
+            
+            document.getElementById('back-arrow').classList.remove('d-none');
+            document.getElementById('back-arrow').classList.add('d-block');
+        }
     });
 
     document.getElementById('back-arrow').addEventListener('click', function() {
@@ -690,18 +656,20 @@
         // Handle click event for selecting bank
         $('#selectBank').click(function() {
             // Show the bank section and hide the crypto section
-            $('#bank').show();
-            $('#crypto').hide();
+                if ("{{ $user->is_approved }}" === "approved") {
+                    $('#bank').show();
+                    $('#crypto').hide();
+                }
 
-            $('#crypto-amount').prop('disabled', true);
-            $('#crypto-method').prop('disabled', true);
+                $('#crypto-amount').prop('disabled', true);
+                $('#crypto-method').prop('disabled', true);
 
-            $('#bank-amount').prop('disabled', false);
-            $('#bank-method').prop('disabled', false);
+                $('#bank-amount').prop('disabled', false);
+                $('#bank-method').prop('disabled', false);
 
-            // Add active state to the selected option
-            $('#selectBank').addClass('active');
-            $('#selectCrypto').removeClass('active');
+                // Add active state to the selected option
+                $('#selectBank').addClass('active');
+                $('#selectCrypto').removeClass('active');
         });
 
         // Function to handle copy to clipboard
