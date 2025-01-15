@@ -20,74 +20,184 @@ class FrontendController extends Controller
         return view('frontend.index');
     }
 
+    public function bonds()
+    {
+        return view('frontend.bonds');
+    }
+
+    public function ira()
+    {
+        return view('frontend.ira');
+    }
+
+    public function portfolio()
+    {
+        return view('frontend.portfolio');
+    }
+
+    public function socially()
+    {
+        return view('frontend.socially');
+    }
+
+    public function crypto()
+    {
+        return view('frontend.crypto');
+    }
+
+    public function performance()
+    {
+        return view('frontend.performance');
+    }
+
+    public function reserve()
+    {
+        return view('frontend.reserve');
+    }
+
+    public function checking()
+    {
+        return view('frontend.checking');
+    }
+
+    public function rewards()
+    {
+        return view('frontend.rewards');
+    }
+
+    public function expert()
+    {
+        return view('frontend.expert');
+    }
+
+    public function retirement()
+    {
+        return view('frontend.retirement');
+    }
+
+    public function goals()
+    {
+        return view('frontend.goals');
+    }
+
+    public function dash()
+    {
+        return view('frontend.dash');
+    }
+
     public function about()
     {
         return view('frontend.about');
     }
 
-    public function advisor()
+    public function review()
     {
-        return view('frontend.advisor');
+        return view('frontend.review');
     }
 
-    public function solution()
+    public function philosophy()
     {
-        return view('frontend.solution');
+        return view('frontend.philosophy');
     }
 
-    public function traning()
+    public function pricing()
     {
-        return view('frontend.traning');
+        return view('frontend.pricing');
     }
 
-    public function platform()
-    {
-        return view('frontend.platform');
-    }
-    public function investment()
-    {
-        return view('frontend.investment');
-    }
-    public function turnkey()
-    {
-        return view('frontend.turnkey');
-    }
-    public function service()
-    {
-        return view('frontend.service');
-    }
-    public function financial()
-    {
-        return view('frontend.financial');
-    }
-    public function market()
-    {
-        return view('frontend.market');
-    }
-    public function news()
-    {
-        return view('frontend.news');
-    }
-
-    public function testimonial()
-    {
-        return view('frontend.testimonial');
-    }
     public function press()
     {
         return view('frontend.press');
     }
-    public function demo()
+
+    public function article()
     {
-        return view('frontend.demo');
+        return view('frontend.article');
     }
 
-    public function privacy()
+    public function video()
     {
-        return view('frontend.privacy');
+        return view('frontend.video');
     }
-    public function terms()
+
+    public function employee()
     {
-        return view('frontend.terms');
+        return view('frontend.employee');
+    }
+
+    public function help()
+    {
+        return view('frontend.help');
+    }
+
+    public function faq()
+    {
+        return view('frontend.faq');
+    }
+
+    public function career()
+    {
+        return view('frontend.career');
+    }
+
+    public function charitable()
+    {
+        return view('frontend.charitable');
+    }
+
+    public function howitworks()
+    {
+        return view('frontend.howitworks');
+    }
+
+    public function referal()
+    {
+        return view('frontend.referal');
+    }
+
+    public function tax()
+    {
+        return view('frontend.tax');
+    }
+    
+    public function contact()
+    {
+        return view('frontend.contact');
+    }
+    
+
+    
+
+
+
+
+
+
+
+
+
+    public function investment()
+    {
+        return view('frontend.investment');
+    }
+
+    public function cash()
+    {
+        return view('frontend.cash');
+    }
+
+    public function stocks()
+    {
+        return view('frontend.index');
+    }
+
+    public function blog()
+    {
+        return view('frontend.blog');
+    }
+
+    public function college()
+    {
+        return view('frontend.college');
     }
 }

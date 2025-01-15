@@ -16,7 +16,58 @@
         -moz-appearance: textfield; /* Firefox */
     }
 </style>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const phoneCodeSelect = document.getElementById("phone-code");
+    const apiUrl = "https://restcountries.com/v3.1/all";
 
+    // Function to fetch data with retry logic
+    function fetchData(url, retries = 2) {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Clear any loading or error text
+                phoneCodeSelect.innerHTML = "";
+
+                // Sort countries alphabetically
+                const sortedCountries = data.sort((a, b) =>
+                    a.name.common.localeCompare(b.name.common)
+                );
+
+                // Populate the select dropdown with country phone codes
+                sortedCountries.forEach(country => {
+                    if (country.idd && country.idd.root) {
+                        const phoneCode =
+                            country.idd.root + (country.idd.suffixes ? country.idd.suffixes[0] : "");
+                        const option = document.createElement("option");
+                        option.value = phoneCode;
+                        option.textContent = `${country.name.common} (${phoneCode})`;
+                        phoneCodeSelect.appendChild(option);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Error fetching phone codes:", error);
+                if (retries > 0) {
+                    console.log(`Retrying... (${retries} attempts left)`);
+                    fetchData(url, retries - 1);
+                } else {
+                    phoneCodeSelect.innerHTML = "<option value=''>Error loading data</option>";
+                }
+            });
+    }
+
+    // Initial fetch
+    phoneCodeSelect.innerHTML = "<option>Loading...</option>";
+    fetchData(apiUrl);
+    fetchData(apiUrl);
+});
+</script>
 
 @section('content')
 <!-- Start::app-content -->
@@ -35,7 +86,7 @@
                         </a> 
                     </div>
                     <p class="h4 fw-semibold mb-1 text-center">Sign Up</p>
-                    <p class="mb-4 text-muted fw-normal text-center fs-14">Create Your Crestwood Capitals Account</p>
+                    <p class="mb-4 text-muted fw-normal text-center fs-14">Create your Brookstone Account</p>
                     @if (session('error'))
                         <div class="alert alert-fill-danger" role="alert">
                             <i data-feather="alert-circle" class="mr-2"></i>
@@ -83,15 +134,19 @@
                                         <div class="col-xl-6">
                                             <label for="phone" class="form-label d-block">Phone Number</label>
                                             <div class="input-group">
-                                                <select class="input-group-text text-start" style="width: 60px; font-size: 12px; padding:0px 5px;" name="phone_code" id="" style="appearance: none !important;">
-                                                    @foreach(\App\Models\Country::orderBy('phone_code', 'asc')->get() as $country)
-                                                        <option style="width: 10px;" value="{{ $country->phone_code }}" 
-                                                            {{ old('phone_code') == $country->phone_code ? 'selected' : '' }}>
-                                                            {{ $country->phone_code }}
-                                                        </option>
-                                                    @endforeach
+                                                <select class="input-group-text text-start" 
+                                                        id="phone-code" 
+                                                        name="phone_code" 
+                                                        style="width: 100px; font-size: 12px; padding: 0px 5px;">
+                                                    <option value="">Loading...</option>
                                                 </select>
-                                                <input class="form-control" id="phone" type="number" name="phone" required value="{{ old('phone') }}">
+                                                <input class="form-control" 
+                                                    id="phone" 
+                                                    type="number" 
+                                                    name="phone" 
+                                                    required 
+                                                    value="{{ old('phone') }}" 
+                                                    placeholder="Enter your phone number">
                                             </div>
                                             @error('phone')
                                                 <span class="text-danger">

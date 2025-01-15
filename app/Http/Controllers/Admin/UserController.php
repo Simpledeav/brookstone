@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Validator;
+use App\Http\Controllers\NotificationController;
 
 class UserController extends Controller
 {
@@ -49,13 +50,83 @@ class UserController extends Controller
         }
 
         // Prepare data for update
+        $action = $request->input('action');
         $data = [
-            'is_approved' => $request->input('action'),
+            'is_approved' => $action,
         ];
 
-        // Update the user profile
+        if($action == 'decline') {
+            if ($oldFrontId = $user->proof) {
+                try {
+                    unlink(public_path($oldFrontId)); // Delete old image
+                } catch (\Exception $e) {
+                    // Handle any error
+                }
+            }
+
+            $user->update([
+                'proof' => null,
+            ]);
+        }
+
+        // Update the user's approval status
         if ($user->update($data)) {
-            return back()->with('success', 'Profile updated successfully');
+            // Success response
+            return back()->with('success', 'Proof updated successfully');
+        }
+
+        return back()->withInput()->with('error', 'Error updating profile');
+    }
+
+    public function identityUpdate(Request $request, User $user)
+    {
+        // Validate the request
+        $validator = Validator::make($request->all(), [
+            'action' => 'required|in:approved,decline',
+        ]);
+
+        if ($validator->fails()) {
+            // Return with validation errors and input
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('error', 'Invalid input data: ' . implode(', ', $validator->errors()->all()));
+        }
+
+        // Prepare data for update
+        $action = $request->input('action');
+        $data = [
+            'is_id_approved' => $action,
+        ];
+
+        if($action == 'decline') {
+            if ($oldFrontId = $user->front_id) {
+                try {
+                    unlink(public_path($oldFrontId)); // Delete old image
+                } catch (\Exception $e) {
+                    // Handle any error
+                }
+            }
+
+            if ($oldFrontId = $user->back_id) {
+                try {
+                    unlink(public_path($oldFrontId)); // Delete old image
+                } catch (\Exception $e) {
+                    // Handle any error
+                }
+            }
+
+            $user->update([
+                'front_id' => null,
+                'back_id' => null,
+            ]);
+        }
+
+        // Update the user's approval status
+        if ($user->update($data)) {
+            // Send notification to user
+            NotificationController::sendIDApprovalNotification($user, $action);
+            return back()->with('success', 'Identity updated successfully');
         }
 
         return back()->withInput()->with('error', 'Error updating profile');

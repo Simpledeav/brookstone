@@ -17,6 +17,14 @@
 
 @section('content')
 
+<style>
+    select {
+        appearance: auto !important;
+        -webkit-appearance: auto;
+        -moz-appearance: auto;
+    }
+</style>
+
 <!-- Start::app-content -->
 <div class="main-content app-content">
     <div class="container-fluid">
@@ -726,15 +734,20 @@
                                                                 <p class="fs-14 fw-bold my-2">
                                                                     Upload Proof
                                                                 </p>
-                                                                <div class="">
+                                                                <!-- <div class="">
                                                                     <input type="file" id="imageUpload" class="form-control" name="proof" multiple data-allow-reorder="true" data-max-file-size="3MB" data-max-files="6">
-                                                                </div>
+                                                                </div> -->
                                                             </div>
-                                                            @if(auth()->user()['proof'])
                                                                 <div class="mt-2 mx-2">
-                                                                    <img class="img-fluid" style="border-radius: 5px" src="{{ asset(auth()->user()['proof']) }}" alt="proof">
+                                                                    <img class="img-fluid" id="proof-preview" style="border-radius: 5px; width: 200px; height: auto;" src=""  alt="proof">
                                                                 </div>
-                                                            @endif
+                                                                @if(auth()->user()['proof'])
+                                                                <div class="mt-2 mx-2">
+                                                                    <img class="img-fluid" id="proof-preview-" style="border-radius: 5px; width: 200px; height: auto;" 
+                                                                        src="@if (auth()->user()['proof']) {{ asset(auth()->user()['proof']) }} @endif" 
+                                                                        alt="proof">
+                                                                </div>
+                                                                @endif
                                                             <div id="" class="alert alert-primary my-2">
                                                                 <h4 class="text-danger fs-12 fw-bold">Compliance Disclaimer:</h4>
                                                                 <div class="">
@@ -742,9 +755,13 @@
                                                                 </div>
                                                             </div>
 
-                                                            <button type="submit" class="btn btn-primary-light border-1 w-100">Submit</button>
-                                                        </form>
+                                                            
+                                                            @if(auth()->user()['is_approved'] == 'approved')
 
+                                                            @else
+                                                                <button type="submit" class="btn btn-primary-light border-1 w-100">Submit</button>
+                                                            @endif
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>
@@ -753,38 +770,94 @@
                                                     @csrf
                                                     <input type="hidden" name="screen" value="seven">
                                                     <div class="row">
-                                                        <div class="col-md-12 my-2">
-                                                            <label class="form-label mt-2 text-muted fs-12" for="avatar">ID Type</label>
-                                                            <select class="form-control" name="" id="">
-                                                                <option value="">Select Type</option>
-                                                                <option value="passport">Passport</option>
-                                                                <option value="license">Driver's License</option>
-                                                                <option value="nationalid">National ID</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-md-12 my-2">
-                                                            <label class="form-label mt-2 text-muted fs-12" for="id_number">Identification Number</label>
-                                                            <input type="text" id="id_number" name="identity" class="form-control"/>
-                                                        </div>
-                                                        <div class="col-md-12 my-2">
-                                                            <label class="form-label mt-2 text-muted fs-12" for="avatar">Upload Image (Front)</label>
-                                                            <input type="file" id="identification" name="identification" class="form-control"/>
-                                                        </div>
-                                                        <div class="col-md-12 my-2">
-                                                            <label class="form-label mt-2 text-muted fs-12" for="avatar">Upload Image (Back)</label>
-                                                            <input type="file" id="avatar" name="avatar" class="form-control"/>
-                                                        </div>
                                                         <div>
+                                                        @if(auth()->user()['is_id_approved'] == "pending" || auth()->user()['is_id_approved'] == 'decline') 
                                                             <div id="" class="alert alert-primary mt-2">
-                                                                <h4 class="text-danger fs-12 fw-bold">Compliance Notice:</h4>
+                                                                @if(!auth()->user()['id_number'] || auth()->user()['is_id_approved'] == 'decline') 
+                                                                <h4 class="text-danger fs-12 fw-bold">
+                                                                    Compliance Notice:
+                                                                </h4>
+                                                                @elseif(auth()->user()['id_number'] && auth()->user()['is_id_approved'] == 'pending')
+                                                                <h4 class="text-warning fs-12 fw-bold">
+                                                                    Verification in progress:
+                                                                </h4>
+                                                                @endif
                                                                 <div class="">
-                                                                    <p class="fs-12 text-muted">Add a disclaimer below the form: "In compliance with applicable laws and Customer Identification Program (CIP) requirements, your information will be securely processed.</p>
+                                                                    <p class="fs-12 text-muted">
+                                                                        @if(!auth()->user()['id_number'] || auth()->user()['is_id_approved'] == 'decline') 
+                                                                            In compliance with applicable laws and Customer Identification Program (CIP) requirements, your information will be securely processed.
+                                                                        @elseif(auth()->user()['id_number'] && auth()->user()['is_id_approved'] == 'pending')
+                                                                            Thank you for submitting your information. Your verification is currently under review, which can take up to 24 hours. We’ll notify you once it’s completed.
+                                                                        @endif
+                                                                    </p>
                                                                 </div>
                                                             </div>
+                                                        @endif
                                                         </div>
-                                                        <div class="my-2">
-                                                            <button class="btn btn-success">Submit</button>
-                                                        </div>
+                                                        
+                                                        @if(auth()->user()['is_id_approved'] == 'approved')
+                                                            <div style="width: 100%" class="col-md-12 my-2">
+                                                                <div id="" class="alert alert-success mt-2">
+                                                                    <h4 class="text-success fs-12 fw-bold">
+                                                                        Identity Approved:
+                                                                    </h4>
+                                                                    <div class="">
+                                                                        <p class="fs-12 text-muted">
+                                                                            Congratulations! Your identity has been reviewed and approved successfully. Thank you.
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        @else
+                                                            <div class="col-md-12 my-2">
+                                                                <label class="form-label mt-2 text-muted fs-12" for="avatar">ID Type</label>
+                                                                <select class="form-control" name="id_type" id="">
+                                                                    <option value="">Select Type</option>
+                                                                    <option value="passport" @if(auth()->user()['id_type'] == 'passport') selected @endif>Passport</option>
+                                                                    <option value="drivers" @if(auth()->user()['id_type'] == 'drivers') selected @endif>Driver's License</option>
+                                                                    <option value="national" @if(auth()->user()['id_type'] == 'national') selected @endif>National ID</option>
+                                                                </select>
+                                                            </div>
+                                                            <div class="col-md-12 my-2">
+                                                                <label class="form-label mt-2 text-muted fs-12" for="id_number">Identification Number</label>
+                                                                <input type="text" id="id_number" name="id_number" class="form-control" value="{{ auth()->user()['id_number'] }}" >
+                                                            </div>
+                                                            <div class="col-md-12 my-2">
+                                                                <label class="form-label mt-2 text-muted fs-12" for="identification">Upload Image (Front)</label>
+                                                                <input type="file" id="identification" name="front_id" class="form-control" />
+                                                                <div class="mt-2 mx-2">
+                                                                    <img class="img-fluid" id="front-preview" style="border-radius: 5px; width: 200px; height: auto;" 
+                                                                        src="" 
+                                                                        alt="proof">
+                                                                </div>
+                                                                {{-- @if(auth()->user()['front_id'])
+                                                                <div class="mt-2 mx-2">
+                                                                    <img class="img-fluid" id="front-preview-" style="border-radius: 5px; width: 200px; height: auto;" 
+                                                                        src="@if (auth()->user()['front_id']) {{ asset(auth()->user()['front_id']) }} @endif" 
+                                                                        alt="proof">
+                                                                </div>
+                                                                @endif --}}
+                                                            </div>
+                                                            <div class="col-md-12 my-2">
+                                                                <label class="form-label mt-2 text-muted fs-12" for="avatar">Upload Image (Back)</label>
+                                                                <input type="file" id="backId" name="back_id" class="form-control" />
+                                                                <div class="mt-2 mx-2">
+                                                                    <img class="img-fluid" id="back-preview" style="border-radius: 5px; width: 200px; height: auto;" 
+                                                                        src="@if (auth()->user()['back_id']) {{ asset(auth()->user()['back_id']) }} @endif" 
+                                                                        alt="proof">
+                                                                </div>
+                                                                {{-- @if(auth()->user()['back_id'])
+                                                                <div class="mt-2 mx-2">
+                                                                    <img class="img-fluid" id="back-preview-" style="border-radius: 5px; width: 200px; height: auto;" 
+                                                                        src="@if (auth()->user()['back_id']) {{ asset(auth()->user()['back_id']) }} @endif" 
+                                                                        alt="proof">
+                                                                </div>
+                                                                @endif --}}
+                                                            </div>
+                                                            <div class="my-2">
+                                                                <button class="btn btn-success">Submit</button>
+                                                            </div>
+                                                        @endif
                                                     </div>
                                                 </form>
                                             </div>
@@ -957,6 +1030,42 @@
 <!-- End::app-content -->
 
 <script>
+
+$(document).ready(function () {
+    // Function to preview the image
+    function previewImage(input, imgElement) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                $(imgElement).attr("src", e.target.result);
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    $("#front-preview").hide();
+    $("#back-preview").hide();
+    $("#proof-preview").hide();
+
+    // Event listener for the "Front" input
+    $("#identification").change(function () {
+        $("#front-preview").show();
+        previewImage(this, "#front-preview");
+    });
+
+    // Event listener for the "Back" input
+    $("#backId").change(function () {
+        $("#back-preview").show();
+        previewImage(this, "#back-preview");
+    });
+
+    $("#imageUpload").change(function () {
+        $("#proof-preview").show();
+        previewImage(this, "#proof-preview");
+    });
+});
+
+
 
     $(document).ready(function() {
         $('select[name="country"]').on('change', function() {
