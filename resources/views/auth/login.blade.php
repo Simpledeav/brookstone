@@ -15,7 +15,7 @@
                 <div class="card-body p-5">
                     <div class="mb-3 d-flex justify-content-center"> 
                         <a href="{{ route('home') }}"> 
-                            <img src="../asset/logo.png" alt="logo" class="desktop-logo"> 
+                            <img src="{{ asset('asset/logo.png') }}" alt="logo" class="desktop-logo"> 
                             <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark"> 
                         </a> 
                     </div>

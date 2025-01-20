@@ -18,7 +18,7 @@
 
             <div class="row w-100 mx-0 auth-page">
                 <div class="col-md-8 col-xl-6 mx-auto d-flex flex-column align-items-center">
-                    <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" width="120px" class="img-fluid mb-4" alt="404">
+                    <img src="{{ asset('asset/logo.png') }}" width="120px" class="img-fluid mb-4" alt="404">
                     <h1 class="font-weight-bold mb-22 mt-2 tx-80 text-muted">@yield('code')</h1>
                     <h4 class="mb-2">Email Verification Successful</h4>
                     <h6 class="text-muted mb-3 text-center">Your email address <b>{{ auth()->user()['email'] }}</b> has been verified successfully</h6>

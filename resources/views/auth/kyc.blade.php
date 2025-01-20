@@ -45,7 +45,7 @@
                     <div class="card-body px-5 py-4">
                         <div class="mb-3 d-flex justify-content-center"> 
                             <a href="{{ route('home') }}"> 
-                                <img src="https://cdn.prod.website-files.com/60f88e4b0ddb8e1d95163233/60f89753ce8105038912ef68_brookstone_logoFULL_2021.svg" alt="logo" class="desktop-logo"> 
+                                <img src="{{ asset('asset/logo.png') }}" alt="logo" class="desktop-logo"> 
                                 <img src="../assets/images/brand-logos/desktop-dark.png" alt="logo" class="desktop-dark"> 
                             </a>
                         </div>
