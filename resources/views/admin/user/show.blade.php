@@ -309,8 +309,8 @@
                                                 <td>{{ $key + 1 }}</td>
                                                 <td>{{ $investment->package['name'] }}</td>
                                                 <td>{{ $investment['slots'] }}</td>
-                                                <td>₦ {{ number_format($investment['amount']) }}</td>
-                                                <td>₦ {{ number_format($investment['total_return']) }}</td>
+                                                <td>$ {{ number_format($investment['amount']) }}</td>
+                                                <td>$ {{ number_format($investment['total_return']) }}</td>
                                                 <td>
                                                     @if($investment['status'] == 'active')
                                                         {{ $investment['return_date']->diffInDays($investment['investment_date']) }}
@@ -415,8 +415,8 @@
                                                 <td>{{ $key + 1 }}</td>
                                             <td>{{ $saving->package['name'] }}</td>
                                             <td class="text-capitalize">{{ $saving->package['duration'] }}</td>
-                                            <td>₦ {{ number_format($saving['amount'] * $paid) }}</td>
-                                            <td>₦ {{ number_format(($saving['amount'] * $saving->package['milestone']) - ($saving['amount'] * $paid)) }}</td>
+                                            <td>$ {{ number_format($saving['amount'] * $paid) }}</td>
+                                            <td>$ {{ number_format(($saving['amount'] * $saving->package['milestone']) - ($saving['amount'] * $paid)) }}</td>
                                             <td>
                                                 @if($saving['status'] == 'active')
                                                     {{ $saving['return_date']->diffInDays(now()) > 0 ? $saving['return_date']->diffInDays(now()) : '---' }}
