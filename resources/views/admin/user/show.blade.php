@@ -407,6 +407,7 @@
                                                 <td></td>
                                             </tr>
                                         @endforeach
+                                        
                                         {{-- @foreach($user->savings()->latest()->get() as $key=>$saving)
                                             @php 
                                                 $paid = $saving->transaction()->where('status', 'approved')->count();
