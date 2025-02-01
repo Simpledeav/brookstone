@@ -140,7 +140,7 @@ class HomeController extends Controller
 
             $currentQuantityCrypto = $stock->quantity;
 
-            $totalInvestmentCrypto += $investmentAmount;
+            $totalInvestmentCrypto += $investmentAmountCrypto;
             $totalCurrentValueCrypto += $currentValue;
             $totalQuantityCrypto += $currentQuantity;
         }
