@@ -164,12 +164,51 @@ class FrontendController extends Controller
     {
         return view('frontend.contact');
     }
+
+    public function solution()
+    {
+        return view('frontend.solution');
+    }
+
+    public function platform()
+    {
+        return view('frontend.platform');
+    }
+
+    public function traning()
+    {
+        return view('frontend.traning');
+    }
+
+    public function turnkey()
+    {
+        return view('frontend.turnkey');
+    }
+
+    public function advisor()
+    {
+        return view('frontend.advisor');
+    }
+
+    public function demo()
+    {
+        return view('frontend.demo');
+    }
+
+    public function privacy()
+    {
+        return view('frontend.privacy');
+    }
+
+    public function terms()
+    {
+        return view('frontend.terms');
+    }
     
-
-
-
-
-
+    public function testimonial()
+    {
+        return view('frontend.testimonial');
+    }
 
 
 
